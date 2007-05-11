@@ -10,6 +10,15 @@ public class TootAudioServerServiceProvider extends AudioServerServiceProvider
     public TootAudioServerServiceProvider() {
         super(ProviderId.TOOT_PROVIDER_ID, "Toot Software", "Toot Audio Servers", "0.1");
         add(JavaSoundAudioServer.class, "JavaSound (stereo)", "default stereo", "0.4");
+        add(MultiIOJavaSoundAudioServer.class, "JavaSound (multi-client stereo)", "multi-client stereo", "0.1");
         // if ASIO available add an ASIO provider
+    }
+    
+    public AudioServerConfiguration createServerConfiguration(AudioServer server) {
+    	if ( server instanceof JavaSoundAudioServer ||
+    		 server instanceof MultiIOJavaSoundAudioServer ) {
+    		return new ExtendedAudioServerConfiguration((ExtendedAudioServer)server);
+    	}
+    	return null; // !!! !!! TODO
     }
 }

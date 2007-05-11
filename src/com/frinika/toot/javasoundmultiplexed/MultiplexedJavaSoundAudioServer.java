@@ -10,8 +10,6 @@ import java.util.List;
 import java.util.Collections;
 import javax.sound.sampled.*;
 
-import com.frinika.toot.ConfigurableAudioServer;
-//import com.frinika.toot.FrinikaAudioSystem;
 import com.frinika.toot.PriorityAudioServer;
 
 import uk.org.toot.audio.server.AudioLine;
@@ -23,7 +21,7 @@ import uk.org.toot.audio.server.IOAudioProcess;
  * buffer provision and management and JavaSound audio I/O provision.
  */
 public class MultiplexedJavaSoundAudioServer extends PriorityAudioServer
-		implements ConfigurableAudioServer {
+{
 	// private byte[] sharedByteBuffer;
 
 	private AudioFormat format;
@@ -119,6 +117,14 @@ public class MultiplexedJavaSoundAudioServer extends PriorityAudioServer
 		}
 	}
 
+	public int getInputLatencyFrames() {
+		return -1; // TODO
+	}
+	
+	public int getOutputLatencyFrames() {
+		return -1; // TODO
+	}
+	
 	public List<String> getAvailableOutputNames() {
 		List<String> names = new java.util.ArrayList<String>();
 
@@ -259,14 +265,6 @@ public class MultiplexedJavaSoundAudioServer extends PriorityAudioServer
 		if (unstableCount > unstableThreshold) {
 			//controlLost(); // !!! !!!
 		}
-	}
-
-	public void setControlLossTolerance(int x) {
-		this.unstableThreshold = x;
-	}
-
-	public int getControlLossTolerance() {
-		return this.unstableThreshold;
 	}
 
 	/**

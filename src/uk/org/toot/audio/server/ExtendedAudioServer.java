@@ -9,6 +9,8 @@ import java.util.List;
 
 public interface ExtendedAudioServer extends AudioServer
 {
+	int getSampleSizeInBits();
+		
     float getPeakLoad();
 
     int getBufferUnderRuns();
@@ -23,6 +25,8 @@ public interface ExtendedAudioServer extends AudioServer
 
     float getMinimumLatencyMilliseconds();
 
+    float getMaximumLatencyMilliseconds();
+    
     float getBufferMilliseconds();
 
     void setBufferMilliseconds(float bufferMilliseconds);
@@ -31,12 +35,10 @@ public interface ExtendedAudioServer extends AudioServer
 
     void resetMetrics();
 
-    int getInputLatencyFrames();
-
-    int getOutputLatencyFrames();
-
     // these two are candidates for promoting to AudioServer
     List<AudioLine> getOutputs();
 
     List<AudioLine> getInputs();
+    
+	String getConfigKey();
 }

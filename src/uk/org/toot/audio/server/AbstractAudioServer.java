@@ -40,11 +40,13 @@ abstract public class AbstractAudioServer
     private int bufferUnderRunThreshold = 0;
 
     private int outputLatencyFrames = 0;
-    private int inputLatencyFrames = 0;
+//    private int inputLatencyFrames = 0;
     private long totalTimeNanos;
 
     private boolean requestResetMetrics = false;
 
+    protected float maximumLatencyMilliseconds = 140f; // default Linux constraint
+    
     /**
      * @link aggregation
      * @supplierCardinality 1 
@@ -159,6 +161,7 @@ abstract public class AbstractAudioServer
         try {
             hasStopped = false;
             isRunning = true;
+            client.setEnabled(true);
             long startTimeNanos;
 			long endTimeNanos;
             long expiryTimeNanos = System.nanoTime(); // init required for jitter
@@ -232,6 +235,7 @@ abstract public class AbstractAudioServer
             e.printStackTrace();
         }
         hasStopped = true;
+        client.setEnabled(false);
 //        System.out.println("Thread stopped");
     }
 
@@ -303,6 +307,10 @@ abstract public class AbstractAudioServer
         return bufferUnderRunThreshold + 5f;
     }
 
+    public float getMaximumLatencyMilliseconds() {
+    	return maximumLatencyMilliseconds;
+    }
+
     public float getMaximumJitterMilliseconds() {
         return maximumJitterMilliseconds;
     }
@@ -333,12 +341,12 @@ abstract public class AbstractAudioServer
 
     protected abstract void resizeBuffers();
 
-    public int getOutputLatencyFrames() {
+/*    public int getOutputLatencyFrames() {
         return outputLatencyFrames;
     }
 
     public int getInputLatencyFrames(){
         return inputLatencyFrames;
-    }
+    } */
 
 }

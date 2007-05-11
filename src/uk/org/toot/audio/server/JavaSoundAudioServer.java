@@ -9,12 +9,13 @@ import java.util.List;
 import java.util.Collections;
 import javax.sound.sampled.*;
 import uk.org.toot.audio.core.*;
+import com.frinika.toot.PriorityAudioServer;
 
 /**
  * JavaSoundAudioServer extends BasicAudioServer with JavaSound-style byte[]
  * buffer provision and management and JavaSound audio I/O provision.
  */
-public class JavaSoundAudioServer extends BasicAudioServer
+public class JavaSoundAudioServer extends PriorityAudioServer //BasicAudioServer
 {
     private byte[] sharedByteBuffer;
 
@@ -26,6 +27,8 @@ public class JavaSoundAudioServer extends BasicAudioServer
 
     private List<JavaSoundAudioInput> inputs;
 
+    private int lineBufferBytes = 32768;
+    
     public JavaSoundAudioServer() {
         outputs = new java.util.ArrayList<JavaSoundAudioOutput>();
         inputs = new java.util.ArrayList<JavaSoundAudioInput>();
@@ -39,6 +42,8 @@ public class JavaSoundAudioServer extends BasicAudioServer
             2, // !!! !!! STEREO
             true,
             false);	// !!! !!!
+        // default to 200ms line buffers
+        lineBufferBytes = format.getFrameSize() * (int)getSampleRate() / 5;
         sharedByteBuffer = createByteBuffer();
     }
 
@@ -80,6 +85,16 @@ public class JavaSoundAudioServer extends BasicAudioServer
         return ret;
     }
 
+    public int getOutputLatencyFrames() {
+    	if ( syncLine == null ) return 0;
+    	return syncLine.getLatencyFrames();
+    }
+    
+    public int getInputLatencyFrames() {
+    	if ( inputs.size() == 0 ) return 0;
+    	return inputs.get(0).getLatencyFrames();
+    }
+    
     public List<String> getAvailableOutputNames() {
         List<String> names = new java.util.ArrayList<String>();
         Mixer.Info[] infos = AudioSystem.getMixerInfo();
@@ -197,7 +212,7 @@ public class JavaSoundAudioServer extends BasicAudioServer
         if ( name == null ) {
             // use the first available output if null is passed
             name = getAvailableOutputNames().get(0);
-            System.out.println("null output name specified, using "+name);
+            System.out.println(label+" null name specified, using "+name);
         }
 //        try {
             output = new JavaSoundAudioOutput(format, outputForName(name), label);
@@ -233,7 +248,7 @@ public class JavaSoundAudioServer extends BasicAudioServer
         if ( name == null ) {
             // use the first available output if null is passed
             name = getAvailableInputNames().get(0);
-            System.out.println("null input name specified, using "+name);
+            System.out.println(label+" null name specified, using "+name);
         }
         input = new JavaSoundAudioInput(format, inputForName(name), label);
         input.open();
@@ -332,7 +347,19 @@ public class JavaSoundAudioServer extends BasicAudioServer
             if ( lineOut != null && lineOut.isOpen()) return;
             try {
 	            lineOut = (SourceDataLine)AudioSystem.getMixer(mixerInfo).getLine(infoOut);
-    	   	    lineOut.open(format);
+    	   	    lineOut.open(format, lineBufferBytes);
+    	   	    if ( syncLine == this ) {
+    	   	    	if ( lineOut.getBufferSize() != lineBufferBytes ) {
+    	   	    		System.out.println("JavaSound Line buffer: "+
+    	   	    			lineBufferBytes+" bytes requested, "+
+    	   	    			lineOut.getBufferSize()+" bytes returned.");
+    	   	    		lineBufferBytes = lineOut.getBufferSize();
+    	   	    	}
+    	   	    	maximumLatencyMilliseconds = 1000 * lineBufferBytes / format.getFrameSize() / format.getSampleRate();
+    	   	    	System.out.println("Maximum latency "+maximumLatencyMilliseconds+" ms");
+    	   	    	maximumLatencyMilliseconds -= 10; // control margin
+    	   	    	System.out.println("Maximum latency constrained to "+maximumLatencyMilliseconds+" ms");
+    	   	        }
             } catch ( LineUnavailableException lue ) {
                 lue.printStackTrace();
             }
@@ -368,7 +395,10 @@ public class JavaSoundAudioServer extends BasicAudioServer
             if ( elapsedMillis > 10 ) {
                 System.out.print("\nO("+(int)elapsedMillis+")");
             } */
-           	latencyFrames = (int)(framesWritten - lineOut.getLongFramePosition());
+            long framePos = lineOut.getLongFramePosition();
+//            framePos /= 512; // simulate M3D resolution !!! !!!
+//            framePos *= 512;
+           	latencyFrames = (int)(framesWritten - framePos);
             if ( latencyFrames < 0 ) {
 //                System.out.println(label+" "+latencyFrames);
                 latencyFrames = 0;
@@ -407,7 +437,7 @@ public class JavaSoundAudioServer extends BasicAudioServer
             try {
     	        lineIn = (TargetDataLine)AudioSystem.getMixer(mixerInfo).getLine(infoIn);
 //				System.out.println("Obtained line, trying to open with "+format);
-	       	    lineIn.open(format);
+	       	    lineIn.open(format, lineBufferBytes);
             } catch ( LineUnavailableException lue ) {
 	            System.out.println(mixerInfo+" does not support "+infoIn);
                 lue.printStackTrace();
@@ -478,4 +508,6 @@ public class JavaSoundAudioServer extends BasicAudioServer
             return lineIn.isActive();
         }
     }
+    
+    public String getConfigKey() { return "javasound"; }
 }

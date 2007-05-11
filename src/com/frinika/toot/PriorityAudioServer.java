@@ -39,8 +39,11 @@ public abstract class PriorityAudioServer extends BasicAudioServer  {
 	private int priorityRequested = -1;
 	private int priority = 0;
 
+	private static boolean isLinux =
+		System.getProperty("os.name").equals("Linux");
+	
 	/**
-	 * The watchDogTimestamp should be as close to system.currentTimeMillis() as possible. If the difference is more than 100ms then the priority 
+	 * The watchDogTimestamp should be as close to system.currentTimeMillis() as possible. If the difference is more than 100ms then the priority
 	 * thread should go to sleep as long as the watchDogTimestamp differs.
 	 */
 	private static long watchDogTimestamp;
@@ -52,47 +55,48 @@ public abstract class PriorityAudioServer extends BasicAudioServer  {
 	 */
 	static
 	{
-	
-		Thread thr = new Thread()
-		{
-			public void run()
+		if ( isLinux ) {
+			Thread thr = new Thread()
 			{
-				while(true)
+				public void run()
 				{
-					watchDogTimestamp = System.currentTimeMillis();
-					try {
-						sleep(1);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}			
+					while(true)
+					{
+						watchDogTimestamp = System.currentTimeMillis();
+						try {
+							sleep(1);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
 				}
-			}
-		};
-		thr.setPriority(Thread.MIN_PRIORITY);
-		thr.start();
+			};
+			thr.setPriority(Thread.MIN_PRIORITY);
+			thr.start();
+		}
 	}
 	
+	   
 	public PriorityAudioServer() {
 	}
 
 	public void work() {
-		/**
-		 * Sleep while System.currentTimeMillis differs more than 100 ms from watchDogTimestamp
-		 */
-		while((System.currentTimeMillis()-watchDogTimestamp)>100)
-		{
-			try {
-				System.out.println("PRIORITY THREAD WATCHDOG: System was blocked for at least "+(System.currentTimeMillis()-watchDogTimestamp)+" ms, freeing resources");
-				Thread.sleep(1);
-			} catch (InterruptedException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-		}
-		
-		if (priorityRequested != -1) {
-			if (System.getProperty("os.name").equals("Linux")) {
+		if ( isLinux ) {
+			/**
+			 * Sleep while System.currentTimeMillis differs more than 100 ms from watchDogTimestamp
+			 */
+			while((System.currentTimeMillis()-watchDogTimestamp)>100)
+		    {
+				try {
+					System.out.println("PRIORITY THREAD WATCHDOG: System was blocked for at least "+(System.currentTimeMillis()-watchDogTimestamp)+" ms, freeing resources");
+					Thread.sleep(1);
+				} catch (InterruptedException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+		    }
+			if (priorityRequested != -1) {
 				try {
 					int prio=priorityRequested;
 						if (prio > 0) {
@@ -100,15 +104,15 @@ public abstract class PriorityAudioServer extends BasicAudioServer  {
 						} else {
 							Priority.setPriorityOTHER(prio);
 						}					
-						Priority.display();					
+						Priority.display();	// !!! could block? ST				
 				} catch (Throwable e) {
 					System.err
 							.println("WARN: Problem setting priority "
 									+ e.toString());
 				}
-			}
 			priority=priorityRequested;
 			priorityRequested=-1;
+			}
 		}
 		super.work();
 	}

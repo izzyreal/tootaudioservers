@@ -14,20 +14,23 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import uk.org.toot.swing.SpringUtilities;
 import uk.org.toot.audio.server.*;
-import uk.org.toot.swing.DisposablePanel;
+//import uk.org.toot.swing.DisposablePanel;
 import java.lang.management.*;
 import java.util.List;
 import java.util.Date;
 import java.text.DateFormat;
+import com.frinika.toot.PriorityAudioServer;
+//import java.text.ParseException;
 
 /**
  * An AudioServerPanel provides a UI for an AudioServer which allows control
  * of internal buffer time and latency time and monitors actual latency.
  * The panel polls the values at periodic intervals.
  */
-public class AudioServerPanel extends DisposablePanel implements ActionListener
+public class AudioServerPanel extends JPanel implements ActionListener
 {
     private ExtendedAudioServer server;
+    private AudioServerConfiguration config;
     private int periodMilliseconds = 2000;
 
     private JSpinner bufferMillis;
@@ -59,7 +62,11 @@ public class AudioServerPanel extends DisposablePanel implements ActionListener
     private static ThreadMXBean mxbean;
     private static boolean hasCpuTime = false;
     private static boolean hasContentionMonitoring = false;
-/*
+
+	private static boolean isLinux =
+		System.getProperty("os.name").equals("Linux");
+	
+    /*
     static {
         // set up ThreadMXBean and derived variables
         mxbean = ManagementFactory.getThreadMXBean();
@@ -79,8 +86,9 @@ public class AudioServerPanel extends DisposablePanel implements ActionListener
     }
 */
 
-    public AudioServerPanel(final ExtendedAudioServer server) {
+    public AudioServerPanel(final ExtendedAudioServer server, final AudioServerConfiguration config) {
         this.server = server;
+        this.config = config;
         shortTime = DateFormat.getTimeInstance(DateFormat.SHORT);
         setLayout(new BorderLayout());
         add(buildManagementPanel(), BorderLayout.WEST);
@@ -222,24 +230,46 @@ public class AudioServerPanel extends DisposablePanel implements ActionListener
         addRow(p, "Sample Rate", new JLabel(String.valueOf((int)server.getSampleRate()), JLabel.CENTER), "Hz");
         addRow(p, "Sample Size", new JLabel(String.valueOf(server.getSampleSizeInBits()), JLabel.CENTER), "bits");
         nrows += 2;
+
+        if ( isLinux && server instanceof PriorityAudioServer ) {
+        	final PriorityAudioServer pas = (PriorityAudioServer)server;
+            final SpinnerNumberModel priorityModel =
+                new SpinnerNumberModel((int)pas.getPriority(), 0, 99, 0);
+            final JSpinner priority = new Spinner(priorityModel);
+            priority.addChangeListener(
+                new ChangeListener() {
+                	public void stateChanged(ChangeEvent e) {
+                    	pas.requestPriority(priorityModel.getNumber().intValue());
+                    	config.update();
+                	}
+            	}
+            );
+            addRow(p, "Priority", priority, "");
+        	nrows += 1;
+        }
+        
         final SpinnerNumberModel bufferModel =
             new SpinnerNumberModel((int)server.getBufferMilliseconds(), 1, 10, 1);
-        bufferMillis = new MilliSpinner(bufferModel);
+        bufferMillis = new Spinner(bufferModel);
         bufferMillis.addChangeListener(
             new ChangeListener() {
             	public void stateChanged(ChangeEvent e) {
                 	server.setBufferMilliseconds((float)bufferModel.getNumber().intValue());
+                	config.update();
             	}
         	}
         );
         final SpinnerNumberModel latencyModel =
             new SpinnerNumberModel((int)server.getLatencyMilliseconds(),
-            	(int)server.getMinimumLatencyMilliseconds(), 250, 1);
-        latencyMillis = new MilliSpinner(latencyModel);
+            	(int)server.getMinimumLatencyMilliseconds(), 
+            	(int)server.getMaximumLatencyMilliseconds(), 1);
+        latencyMillis = new Spinner(latencyModel);
         latencyMillis.addChangeListener(
             new ChangeListener() {
             	public void stateChanged(ChangeEvent e) {
-                	server.setLatencyMilliseconds((float)latencyModel.getNumber().intValue());
+            		float latencyms = (float)latencyModel.getNumber().intValue();
+           			server.setLatencyMilliseconds(latencyms);
+           			config.update();
             	}
         	}
         );
@@ -313,9 +343,9 @@ public class AudioServerPanel extends DisposablePanel implements ActionListener
 
     private static Dimension spinnerSize = new Dimension(50, 24);
 
-    static protected class MilliSpinner extends JSpinner
+    static protected class Spinner extends JSpinner
     {
-        public MilliSpinner(SpinnerModel model) {
+        public Spinner(SpinnerModel model) {
             super(model);
         }
 
