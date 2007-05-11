@@ -31,6 +31,10 @@ public class ExtendedAudioServerConfiguration extends AudioServerConfiguration
 	}
 
 	public void applyProperties(Properties p) {
+    	if ( p == null ) {
+     	   System.err.println("null properties passed to ExtendedAudioServerConfiguration.applyProperties()");
+     	   return;
+     	}
 		String k = server.getConfigKey();
 		String value = p.getProperty(k+USER_BUFFER);
 		if ( value != null ) {
