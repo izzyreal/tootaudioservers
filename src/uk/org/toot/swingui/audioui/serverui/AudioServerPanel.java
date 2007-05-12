@@ -89,6 +89,7 @@ public class AudioServerPanel extends JPanel implements ActionListener
     public AudioServerPanel(final ExtendedAudioServer server, final AudioServerConfiguration config) {
         this.server = server;
         this.config = config;
+        eachIOlatency = server instanceof JavaSoundAudioServer; // !!!
         shortTime = DateFormat.getTimeInstance(DateFormat.SHORT);
         setLayout(new BorderLayout());
         add(buildManagementPanel(), BorderLayout.WEST);
