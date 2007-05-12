@@ -36,6 +36,7 @@ class StereoOutConnection implements AudioLine {
 
 	ChannelFormat chanFormat;
 
+	boolean isBigEndian;
 	/*
 	 *  
 	 */
@@ -45,6 +46,7 @@ class StereoOutConnection implements AudioLine {
 		for (int i = 0; i < chan.length; i++)
 			this.chan[i] = chan[i];
 
+		isBigEndian=dev.getFormat().isBigEndian();
 	}
 
 //	public void open() {
@@ -68,14 +70,26 @@ class StereoOutConnection implements AudioLine {
 
 			float out[] = buffer.getChannel(ch);
 
-			for (int i = 0; i < n; i++) {
-				int ib = i * 2 * nchan + ch * 2;
+			if (isBigEndian) {
+				for (int i = 0; i < n; i++) {
+					int ib = i * 2 * nchan + ch * 2;
 
-				short sample = (short) (out[i] * 32768f);
+					short sample = (short) (out[i] * 32768f);
 
-				bytes[ib + 1] = (byte) (0xff & sample);
-				bytes[ib] = (byte) (0xff & (sample >> 8));
+					bytes[ib + 1] = (byte) (0xff & sample);
+					bytes[ib] = (byte) (0xff & (sample >> 8));
 
+				}
+			} else {
+				for (int i = 0; i < n; i++) {
+					int ib = i * 2 * nchan + ch * 2;
+					short sample = (short) (out[i] * 32768f);
+					bytes[ib + 1] = (byte) (0xff & sample>>8);
+					bytes[ib] = (byte) (0xff & (sample ));
+
+				}
+				
+				
 			}
 		}
 		return AUDIO_OK;
