@@ -17,8 +17,14 @@ import uk.org.toot.audio.server.AudioLine;
 import uk.org.toot.audio.server.IOAudioProcess;
 
 /**
- * JavaSoundAudioServer extends BasicAudioServer with JavaSound-style byte[]
- * buffer provision and management and JavaSound audio I/O provision.
+ * MultiplexedJavaSoundAudioServer 
+ * 
+ * Provides a Server based on a single javasound DataLine for inout and output.
+ * 
+ * The widest (most channels) line is used.
+ * 
+ * The server provides IOAudioProcess that can be mono or stereo based on 1 or 2 channels of the target data line.
+ *
  */
 public class MultiplexedJavaSoundAudioServer extends PriorityAudioServer
 {
@@ -76,7 +82,7 @@ public class MultiplexedJavaSoundAudioServer extends PriorityAudioServer
 	protected void resizeBuffers() {
 		try {
 			throw new Exception(
-					" NO resizing implment for the multiplexed server");
+					" NO resizing implmented for the multiplexed server");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
