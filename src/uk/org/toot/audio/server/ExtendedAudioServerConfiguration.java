@@ -25,7 +25,7 @@ public class ExtendedAudioServerConfiguration extends AudioServerConfiguration
 		p.setProperty(k+LATENCY, String.valueOf(server.getLatencyMilliseconds()));
 		if ( hasPriority ) {
 			PriorityAudioServer pas = (PriorityAudioServer)server;
-			p.put(k+PRIORITY, pas.getPriority());
+			p.setProperty(k+PRIORITY, String.valueOf(pas.getPriority()));
 		}
 		return p;
 	}
