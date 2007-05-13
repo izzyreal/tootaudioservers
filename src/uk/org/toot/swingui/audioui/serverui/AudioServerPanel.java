@@ -19,7 +19,6 @@ import java.lang.management.*;
 import java.util.List;
 import java.util.Date;
 import java.text.DateFormat;
-import javax.swing.text.MaskFormatter;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
 import com.frinika.toot.PriorityAudioServer;
@@ -98,6 +97,7 @@ public class AudioServerPanel extends JPanel implements ActionListener
         shortTime = DateFormat.getTimeInstance(DateFormat.SHORT);
         setLayout(new BorderLayout());
         add(buildManagementPanel(), BorderLayout.WEST);
+        add(buildButtonPanel(), BorderLayout.SOUTH);
 //        add(buildLogPanel, BorderLayout.CENTER);
   		timer = new Timer(periodMilliseconds, this);
         timer.start();
@@ -132,7 +132,7 @@ public class AudioServerPanel extends JPanel implements ActionListener
                 "ms, T="+String.valueOf(Math.round(100 * server.getPeakLoad()))+"%");
         	underRunCount = underRuns;
             // reset the metrics !!! !!!
-            server.resetMetrics();
+            server.resetMetrics(false);
       	}
 
         if ( eachIOlatency ) {
@@ -232,6 +232,17 @@ public class AudioServerPanel extends JPanel implements ActionListener
 	    l.setLabelFor(comp);
     }
 
+    protected JPanel buildButtonPanel() {
+    	JPanel p = new JPanel();
+    	JButton reset = new JButton("Reset");
+    	reset.addActionListener(new ActionListener() {
+    		public void actionPerformed(ActionEvent ae) {
+    			server.resetMetrics(true);
+    		}
+    	});
+       	p.add(reset);
+    	return p;
+    }
     protected JPanel buildManagementPanel() {
 		// Create and populate the panel.
 		JPanel p = new JPanel(new SpringLayout());

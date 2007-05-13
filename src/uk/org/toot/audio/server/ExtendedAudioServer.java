@@ -37,7 +37,7 @@ public interface ExtendedAudioServer extends AudioServer
 
     float getLatencyMilliseconds();
 
-    void resetMetrics();
+    void resetMetrics(boolean resetUnderruns);
 
     // these two are candidates for promoting to AudioServer
     List<AudioLine> getOutputs();

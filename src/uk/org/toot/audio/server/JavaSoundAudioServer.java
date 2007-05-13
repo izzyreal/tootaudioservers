@@ -356,9 +356,9 @@ public class JavaSoundAudioServer extends PriorityAudioServer //BasicAudioServer
     	   	    		lineBufferBytes = lineOut.getBufferSize();
     	   	    	}
     	   	    	maximumLatencyMilliseconds = 1000 * lineBufferBytes / format.getFrameSize() / format.getSampleRate();
-    	   	    	System.out.println("Maximum latency "+maximumLatencyMilliseconds+" ms");
+    	//   	    	System.out.println("Maximum latency "+maximumLatencyMilliseconds+" ms");
     	   	    	maximumLatencyMilliseconds -= 10; // control margin
-    	   	    	System.out.println("Maximum latency constrained to "+maximumLatencyMilliseconds+" ms");
+    	//   	    	System.out.println("Maximum latency constrained to "+maximumLatencyMilliseconds+" ms");
     	   	        }
             } catch ( LineUnavailableException lue ) {
                 lue.printStackTrace();

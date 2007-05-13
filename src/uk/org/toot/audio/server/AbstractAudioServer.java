@@ -265,24 +265,27 @@ abstract public class AbstractAudioServer
     }
 
     protected void controlGained() {
-        resetMetrics();
+        resetMetrics(false);
     }
 
-    public void resetMetrics() {
+    public void resetMetrics(boolean resetUnderruns) {
         requestResetMetrics = true;
+        if ( resetUnderruns ) {
+        	bufferUnderRuns = 0;
+        }
     }
 
     protected void reset() {
         lowestLatencyMilliseconds = actualLatencyMilliseconds;
         maximumJitterMilliseconds = 0;
-//        bufferUnderRuns = 0;
+        // underruns can't be reset here because underruns cause reset
         peakLoad = 0;
     }
 
     public void setLatencyMilliseconds(float ms) {
         latencyMilliseconds = ms;
         // reset other metrics synchronously
-        resetMetrics();
+        resetMetrics(false);
     }
 
     public float getLatencyMilliseconds() {
@@ -341,13 +344,4 @@ abstract public class AbstractAudioServer
     }
 
     protected abstract void resizeBuffers();
-
-/*    public int getOutputLatencyFrames() {
-        return outputLatencyFrames;
-    }
-
-    public int getInputLatencyFrames(){
-        return inputLatencyFrames;
-    } */
-
 }
