@@ -253,8 +253,10 @@ public class AudioServerPanel extends JPanel implements ActionListener
 
         if ( isLinux && server instanceof PriorityAudioServer ) {
         	final PriorityAudioServer pas = (PriorityAudioServer)server;
+        	int prio = pas.getPriority();
+        	if ( prio < 0 || prio > 99 ) prio = 0;
             final SpinnerNumberModel priorityModel =
-                new SpinnerNumberModel((int)pas.getPriority(), 0, 99, 1);
+                new SpinnerNumberModel(prio, 0, 99, 1);
             final JSpinner priority = new Spinner(priorityModel);
             priority.addChangeListener(
                 new ChangeListener() {
