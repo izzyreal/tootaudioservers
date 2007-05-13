@@ -244,12 +244,6 @@ public class MultiplexedJavaSoundAudioServer extends PriorityAudioServer
 		return "java_multiplexed";
 	}
 
-	public int getTotalLatencyInFrames() {
-		// TODO Auto-generated method stub
-		assert (false);
-		return -1;
-	}
-
 	public void work() {
 
 		// if (inDevice != null) inDevice.fillBuffer();
