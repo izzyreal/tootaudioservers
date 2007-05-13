@@ -41,7 +41,7 @@ abstract public class AbstractAudioServer
 
     private int outputLatencyFrames = 0;
 //    private int inputLatencyFrames = 0;
-    private int hardwareLatencyFrames = 256;
+    private int hardwareLatencyFrames = 0; // user needs to set 
     private int totalLatencyFrames = -1;
     
     private long totalTimeNanos;

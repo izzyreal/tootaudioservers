@@ -265,6 +265,7 @@ public class AudioServerPanel extends JPanel implements ActionListener
         	new PropertyChangeListener() {
         		public void propertyChange(PropertyChangeEvent e) {
         			server.setHardwareLatencyFrames(((Number)hardwareFrames.getValue()).intValue());
+        			config.update();
         		}
         	}
         );
