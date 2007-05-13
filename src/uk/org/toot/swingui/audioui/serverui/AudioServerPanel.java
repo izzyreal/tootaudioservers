@@ -19,6 +19,9 @@ import java.lang.management.*;
 import java.util.List;
 import java.util.Date;
 import java.text.DateFormat;
+import javax.swing.text.MaskFormatter;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeEvent;
 import com.frinika.toot.PriorityAudioServer;
 //import java.text.ParseException;
 
@@ -33,6 +36,7 @@ public class AudioServerPanel extends JPanel implements ActionListener
     private AudioServerConfiguration config;
     private int periodMilliseconds = 2000;
 
+    private JFormattedTextField hardwareFrames;
     private JSpinner bufferMillis;
     private JSpinner latencyMillis;
     private JLabel actualLatencyMillis, lowestLatencyMillis, totalLatencyMillis; 
@@ -252,6 +256,20 @@ public class AudioServerPanel extends JPanel implements ActionListener
             addRow(p, "Priority", priority, "");
         	nrows += 1;
         }
+
+        hardwareFrames = new JFormattedTextField();        	
+        hardwareFrames.setValue(new Integer(server.getHardwareLatencyFrames()));
+        hardwareFrames.setColumns(4);
+        hardwareFrames.setHorizontalAlignment(JTextField.TRAILING);
+        hardwareFrames.addPropertyChangeListener("value",
+        	new PropertyChangeListener() {
+        		public void propertyChange(PropertyChangeEvent e) {
+        			server.setHardwareLatencyFrames(((Number)hardwareFrames.getValue()).intValue());
+        		}
+        	}
+        );
+        addRow(p, "Hardware Buffer", hardwareFrames, "frames");
+        nrows += 1;
         
         final SpinnerNumberModel bufferModel =
             new SpinnerNumberModel((int)server.getBufferMilliseconds(), 1, 10, 1);

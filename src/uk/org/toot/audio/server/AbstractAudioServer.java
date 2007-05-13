@@ -41,6 +41,7 @@ abstract public class AbstractAudioServer
 
     private int outputLatencyFrames = 0;
 //    private int inputLatencyFrames = 0;
+    private int hardwareLatencyFrames = 256;
     private int totalLatencyFrames = -1;
     
     private long totalTimeNanos;
@@ -155,8 +156,15 @@ abstract public class AbstractAudioServer
         return isRunning;
     }
 
+    public int getHardwareLatencyFrames() {
+    	return hardwareLatencyFrames;
+    }
+    
+    public void setHardwareLatencyFrames(int frames) {
+    	hardwareLatencyFrames = frames;
+    }
     public int getTotalLatencyFrames() {
-    	return totalLatencyFrames;
+    	return totalLatencyFrames + 2 * hardwareLatencyFrames;
     }
     
     public void run() {
