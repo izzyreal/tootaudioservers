@@ -41,6 +41,8 @@ abstract public class AbstractAudioServer
 
     private int outputLatencyFrames = 0;
 //    private int inputLatencyFrames = 0;
+    private int totalLatencyFrames = -1;
+    
     private long totalTimeNanos;
 
     private boolean requestResetMetrics = false;
@@ -72,10 +74,8 @@ abstract public class AbstractAudioServer
 
     protected boolean started = false;
     protected int stableCount = 0;
-    protected int unstableCount = 0;
-
+ 
     protected int stableThreshold = 1000;
-    protected int unstableThreshold = 3;
 
     public AbstractAudioServer() { //throws Exception {
         totalTimeNanos = (long)(bufferMilliseconds * ONE_MILLION);
@@ -91,7 +91,6 @@ abstract public class AbstractAudioServer
         if ( osName.contains("Windows") ) {
             // only correct for DirectSound !!!
             bufferUnderRunThreshold = 30;
-            unstableThreshold = 100; // 100 consecutire underruns are OK
         }
         requestedTimingStrategy = new SleepTimingStrategy();
     }
@@ -131,7 +130,6 @@ abstract public class AbstractAudioServer
         started = false;
         startASAP = false;
         stableCount = 0;
-        unstableCount = 0;
        	System.out.println("AudioServer starting");
        	thread = new Thread(this, THREAD_NAME);
        	thread.start();
@@ -157,6 +155,10 @@ abstract public class AbstractAudioServer
         return isRunning;
     }
 
+    public int getTotalLatencyFrames() {
+    	return totalLatencyFrames;
+    }
+    
     public void run() {
         try {
             hasStopped = false;
@@ -190,17 +192,15 @@ abstract public class AbstractAudioServer
 
                 // calculate actual latency
 				outputLatencyFrames = syncLine.getLatencyFrames();
+		    	totalLatencyFrames = outputLatencyFrames + getInputLatencyFrames();
 				actualLatencyMilliseconds = 1000 * outputLatencyFrames / getSampleRate();
                 lowLatencyMillis = actualLatencyMilliseconds - bufferMilliseconds;
                 if ( lowLatencyMillis < bufferUnderRunThreshold ) {
                     if ( started ) {
                     	bufferUnderRuns += 1;
-                        unstableCount += 1;
-                        checkControl();
                     	stableCount = 0;
                     }
                 } else {
-                    unstableCount = 0;
                     stableCount +=1;
                     if ( stableCount == stableThreshold ) { // !!! OK and every 49 days !!!
 	                    started = true;
@@ -258,13 +258,6 @@ abstract public class AbstractAudioServer
 
     protected void controlGained() {
         resetMetrics();
-    }
-
-    protected void checkControl() {
-        if ( unstableCount > unstableThreshold ) {
-            System.out.println("AudioServer Control Lost");
-            stopImpl();
-        }
     }
 
     public void resetMetrics() {

@@ -261,32 +261,4 @@ public class MultiplexedJavaSoundAudioServer extends PriorityAudioServer
 
 	}
 
-	/**
-	 * Called if we get a buffer under run. Called on the audio thread so be
-	 * careful.
-	 * 
-	 */
-	@Override
-	protected void checkControl() {
-		if (unstableCount > unstableThreshold) {
-			//controlLost(); // !!! !!!
-		}
-	}
-
-	/**
-	 * to stop on the processing thread call this
-	 * 
-	 */
-	public void myStop() {
-		stopImpl();
-	}
-
-	/**
-	 * to stop on the processing thread call this
-	 * 
-	 */
-	public void myStart() {
-		startImpl();
-	}
-
 }

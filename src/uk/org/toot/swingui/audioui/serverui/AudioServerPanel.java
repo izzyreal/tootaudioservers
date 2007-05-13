@@ -35,7 +35,8 @@ public class AudioServerPanel extends JPanel implements ActionListener
 
     private JSpinner bufferMillis;
     private JSpinner latencyMillis;
-    private JLabel actualLatencyMillis, lowestLatencyMillis, maxJitterMillis, bufferUnderRuns;
+    private JLabel actualLatencyMillis, lowestLatencyMillis, totalLatencyMillis; 
+    private JLabel maxJitterMillis, bufferUnderRuns;
     private JLabel loadTimePercent, peakLoadTimePercent;
     private JLabel cpuPercent, userPercent, blockedPercent, waitedPercent;
     private JLabel gc1Count, gc1Millis, gc2Count, gc2Millis;
@@ -110,6 +111,9 @@ public class AudioServerPanel extends JPanel implements ActionListener
         if ( !isShowing() ) return;
   		actualLatencyMillis.setText(dpString(server.getActualLatencyMilliseconds(), 1));
   		lowestLatencyMillis.setText(dpString(server.getLowestLatencyMilliseconds(), 1));
+  		float totalLatencyFrames = server.getTotalLatencyFrames();
+  		float totalLatency = 1000 * totalLatencyFrames / server.getSampleRate();
+  		totalLatencyMillis.setText(dpString(totalLatency, 1));
         maxJitterMillis.setText(dpString(server.getMaximumJitterMilliseconds(), 1));
         int underRuns = server.getBufferUnderRuns();
         bufferUnderRuns.setText(String.valueOf(underRuns));
@@ -276,6 +280,7 @@ public class AudioServerPanel extends JPanel implements ActionListener
         );
         actualLatencyMillis = new JLabel("n/a", JLabel.CENTER);
         lowestLatencyMillis = new JLabel("n/a", JLabel.CENTER);
+        totalLatencyMillis = new JLabel("n/a", JLabel.CENTER);
         maxJitterMillis = new JLabel("n/a", JLabel.CENTER);
 		bufferUnderRuns = new  JLabel("n/a", JLabel.CENTER);
         loadTimePercent = new JLabel("n/a", JLabel.CENTER);
@@ -285,11 +290,12 @@ public class AudioServerPanel extends JPanel implements ActionListener
         addRow(p, "Requested Latency", latencyMillis, "ms");
         addRow(p, "Actual Latency", actualLatencyMillis, "ms");
         addRow(p, "Lowest Latency", lowestLatencyMillis, "ms");
+        addRow(p, "Total Latency", totalLatencyMillis, "ms");
         addRow(p, "Maximum Jitter", maxJitterMillis, "ms");
         addRow(p, "Buffer UnderRuns", bufferUnderRuns, "");
         addRow(p, "Time Load", loadTimePercent, "%");
         addRow(p, "Peak Time Load", peakLoadTimePercent, "%");
-        nrows += 8;
+        nrows += 9;
 
         if ( eachIOlatency ) {
 	        for ( int i = 0; i < server.getOutputs().size(); i++ ) {
