@@ -214,17 +214,16 @@ public class JavaSoundAudioServer extends PriorityAudioServer //BasicAudioServer
             name = getAvailableOutputNames().get(0);
             System.out.println(label+" null name specified, using "+name);
         }
-//        try {
+        try {
             output = new JavaSoundAudioOutput(format, outputForName(name), label);
             output.open();
 	        outputs.add(output);
-//        	  output = new AccountingOutput(format, infoForName(name));
-//        } catch ( LineUnavailableException lue ) {
-//        }
-		if ( wasRunning ){
-            start();
-        } else {
-            checkStart(); // start if we should and we can
+        } finally {
+			if ( wasRunning ){
+	            start();
+	        } else {
+	            checkStart(); // start if we should and we can
+	        }
         }
         return output;
     }
@@ -252,7 +251,6 @@ public class JavaSoundAudioServer extends PriorityAudioServer //BasicAudioServer
         }
         input = new JavaSoundAudioInput(format, inputForName(name), label);
         input.open();
-
         inputs.add(input);
 		if ( isRunning ) input.start();
    	    return input;
