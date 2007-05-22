@@ -34,8 +34,8 @@ import javax.sound.sampled.Line;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.Mixer;
 import javax.sound.sampled.SourceDataLine;
-//import javax.sound.sampled.TargetDataLine;
 
+// import javax.sound.sampled.TargetDataLine;
 
 /**
  * Utillity for this package finds the widest line on the mixers and constructs
@@ -47,19 +47,17 @@ import javax.sound.sampled.SourceDataLine;
 class DeviceManager {
 
 	private static int sampleRate = 44100; // !!! !!!
+
 	private static boolean bigEndian = false; // !!! !!!
-	
-	static AudioFormat monoFormat = new AudioFormat(
-			(float) sampleRate, 16, 1, true,
-			bigEndian);
 
-	static AudioFormat stereoFormat = new AudioFormat(
-			(float) sampleRate, 16, 2, true,
-			bigEndian);
+	static AudioFormat monoFormat = new AudioFormat((float) sampleRate, 16, 1,
+			true, bigEndian);
 
-	static AudioFormat format = new AudioFormat(
-			(float) sampleRate, 16, 0, true,
-			bigEndian);
+	static AudioFormat stereoFormat = new AudioFormat((float) sampleRate, 16,
+			2, true, bigEndian);
+
+	static AudioFormat format = new AudioFormat((float) sampleRate, 16, 0,
+			true, bigEndian);
 
 	/* list of available connections */
 	// Vector<AudioConnection> connections = new Vector<AudioConnection>();
@@ -151,13 +149,14 @@ class DeviceManager {
 
 					}
 
-					JavaSoundInDevice device = new JavaSoundInDevice(mixer,
-							new AudioFormat(sampleRate, 16,
-									widest.getChannels(), true,
-									bigEndian), dinfo, bufferSize);
-					System.out.println(" IN: " + device.getName());
-					inDevices.add(device);
-
+					if (widest != null) {
+						JavaSoundInDevice device = new JavaSoundInDevice(mixer,
+								new AudioFormat(sampleRate, 16, widest
+										.getChannels(), true, bigEndian),
+								dinfo, bufferSize);
+						System.out.println(" IN: " + device.getName());
+						inDevices.add(device);
+					}
 				}
 			}
 
@@ -198,13 +197,14 @@ class DeviceManager {
 						// System.out.println(af);
 
 					}
-
-					JavaSoundOutDevice device = new JavaSoundOutDevice(mixer,
-							new AudioFormat(sampleRate, 16,
-									widest.getChannels(), true,
-									bigEndian), dinfo, bufferSize);
-					System.out.println(" OUT: " + device.getName());
-					outDevices.add(device);
+					if (widest != null) {
+						JavaSoundOutDevice device = new JavaSoundOutDevice(
+								mixer, new AudioFormat(sampleRate, 16, widest
+										.getChannels(), true, bigEndian),
+								dinfo, bufferSize);
+						System.out.println(" OUT: " + device.getName());
+						outDevices.add(device);
+					}
 				}
 			}
 

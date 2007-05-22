@@ -30,7 +30,7 @@ public class MultiplexedJavaSoundAudioServer extends PriorityAudioServer
 {
 	// private byte[] sharedByteBuffer;
 
-	private AudioFormat format;
+	//private AudioFormat format;
 
 	private JavaSoundInDevice inDevice;
 
@@ -47,7 +47,7 @@ public class MultiplexedJavaSoundAudioServer extends PriorityAudioServer
 	private DeviceManager deviceManager;
 
 	public MultiplexedJavaSoundAudioServer() {
-		this.format = new AudioFormat(44100.0f, 16, 2, true, false); // !!!
+//		this.format = new AudioFormat(44100.0f, 16, 2, true, false); // !!!
 		// sharedByteBuffer = createByteBuffer();
 		outputs = new java.util.ArrayList<AudioLine>();
 		inputs = new java.util.ArrayList<AudioLine>();
@@ -64,11 +64,11 @@ public class MultiplexedJavaSoundAudioServer extends PriorityAudioServer
 	}
 
 	public float getSampleRate() {
-		return format.getSampleRate();
+		return 44100.0f; //format.getSampleRate();
 	}
 
 	public int getSampleSizeInBits() {
-		return format.getSampleSizeInBits();
+		return 16; // format.getSampleSizeInBits();
 	}
 
 	public List<AudioLine> getOutputs() {
@@ -246,7 +246,7 @@ public class MultiplexedJavaSoundAudioServer extends PriorityAudioServer
 
 	public void work() {
 
-		// if (inDevice != null) inDevice.fillBuffer();
+		if (inDevice != null) inDevice.fillBuffer();
 		if (outDevice != null)
 			outDevice.zeroBuffer();
 		super.work();
