@@ -80,13 +80,17 @@ abstract public class AbstractAudioServer
 
     public AbstractAudioServer() { //throws Exception {
         totalTimeNanos = (long)(bufferMilliseconds * ONE_MILLION);
-        Runtime.getRuntime().addShutdownHook(
-            new Thread() {
-            	public void run() {
-                	AbstractAudioServer.this.stop();
-            	}
-        	}
-    	);
+        try {
+	        Runtime.getRuntime().addShutdownHook(
+	            new Thread() {
+	            	public void run() {
+	                	AbstractAudioServer.this.stop();
+	            	}
+	        	}
+	    	);
+        } catch ( Exception e ) {
+        	System.out.println("AbstractAudioServer Failed to add Shutdown Hook");
+        }
         // estimate buffer underrun threshold for os
         String osName = System.getProperty("os.name");
         if ( osName.contains("Windows") ) {
