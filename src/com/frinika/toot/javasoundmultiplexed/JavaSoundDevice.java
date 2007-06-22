@@ -83,7 +83,7 @@ class JavaSoundDevice {
 
 	
 	public String getName() {
-		return mixer.getMixerInfo().getName()+ af;
+		return toString(); // mixer.getMixerInfo().getName()+ af;
 	}
 
 	public boolean isActive() {
