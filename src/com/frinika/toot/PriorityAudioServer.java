@@ -38,7 +38,8 @@ public abstract class PriorityAudioServer extends BasicAudioServer  {
 
 	private int priorityRequested = -1;
 	private int priority = 0;
-
+	private boolean watchDogAlert = false;
+	
 	private static boolean isLinux =
 		System.getProperty("os.name").equals("Linux");
 	
@@ -84,19 +85,27 @@ public abstract class PriorityAudioServer extends BasicAudioServer  {
 	public void work() {
 		if ( isLinux ) {
 			/**
-			 * Sleep while System.currentTimeMillis differs more than 100 ms from watchDogTimestamp
+			 * Set normal priority if the system is blocking
 			 */
-			while((System.currentTimeMillis()-watchDogTimestamp)>100)
+			if(System.currentTimeMillis()-watchDogTimestamp>100 )
 		    {
-				try {
-					System.out.println("PRIORITY THREAD WATCHDOG: System was blocked for at least "+(System.currentTimeMillis()-watchDogTimestamp)+" ms, freeing resources");
-					Thread.sleep(1);
-				} catch (InterruptedException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
+				if(!watchDogAlert)
+				{
+					System.out.println("PRIORITY THREAD WATCHDOG: System was blocked for at least "+(System.currentTimeMillis()-watchDogTimestamp)+" ms, setting temporary normal priority ");
+					Priority.setPriorityOTHER(0);
+					watchDogAlert = true;
 				}
 		    }
-			if (priorityRequested != -1) {
+			/**
+			 * Restore requested priority when the watchdog timer is up to date
+			 */
+		    else if(watchDogAlert)
+		    {
+		    	watchDogAlert = false;
+		    	priorityRequested = priority;
+		    }
+		    
+			if (priorityRequested != -1 && !watchDogAlert) {
 				try {
 					int prio=priorityRequested;
 						if (prio > 0) {
@@ -110,8 +119,8 @@ public abstract class PriorityAudioServer extends BasicAudioServer  {
 							.println("WARN: Problem setting priority "
 									+ e.toString());
 				}
-			priority=priorityRequested;
-			priorityRequested=-1;
+				priority=priorityRequested;
+				priorityRequested=-1;
 			}
 		}
 		super.work();
