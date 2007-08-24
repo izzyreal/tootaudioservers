@@ -85,7 +85,7 @@ public class MultiIOJavaSoundAudioServer extends JavaSoundAudioServer  {
 			this.process=process;
 		}
 
-		public void open() {
+		public void open() throws Exception {
 			if (openCount== 0 ) process.open();
 			openCount++;
 		}
@@ -94,7 +94,7 @@ public class MultiIOJavaSoundAudioServer extends JavaSoundAudioServer  {
 			return process.processAudio(buffer);
 		}
 
-		public void close() {
+		public void close() throws Exception {
 			openCount--;
 			if (openCount==0) process.close();
 			
