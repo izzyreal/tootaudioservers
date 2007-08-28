@@ -45,7 +45,7 @@ public class MultiIOJavaSoundAudioServer extends JavaSoundAudioServer  {
 	public MultiIOJavaSoundAudioServer() {
 	}
 	
-	public IOAudioProcess openAudioOutput(String name,String label) {
+	public IOAudioProcess openAudioOutput(String name,String label)  throws Exception {
         if ( name == null ) {
             // use the first available output if null is passed
             name = getAvailableOutputNames().get(0);
@@ -54,12 +54,7 @@ public class MultiIOJavaSoundAudioServer extends JavaSoundAudioServer  {
 		IOAudioProcess p=outputMap.get(name);
 		System.out.println(name + "   " + p );
 		if (p == null )
-			try {
 				outputMap.put(name,p=new AudioProcessWrapper(super.openAudioOutput(name, label)));
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
 		return p;
 	}
 

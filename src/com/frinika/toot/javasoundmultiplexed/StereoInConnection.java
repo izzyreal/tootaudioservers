@@ -28,68 +28,72 @@ import uk.org.toot.audio.core.AudioBuffer;
 import uk.org.toot.audio.core.ChannelFormat;
 import uk.org.toot.audio.server.AudioLine;
 
-class StereoOutConnection implements AudioLine {
+class StereoInConnection implements AudioLine {
 
-	private JavaSoundOutDevice dev;
+	private JavaSoundInDevice dev;
 
 	private int chan[];
 
 	ChannelFormat chanFormat;
 
-	boolean isBigEndian;
-	/*
-	 *  
-	 */
-	public StereoOutConnection(JavaSoundOutDevice dev, int chan[]) {
+	boolean isBigendian;
+
+	public StereoInConnection(JavaSoundInDevice dev, int chan[]) {
 		this.dev = dev;
+		isBigendian = dev.getFormat().isBigEndian();
 		this.chan = new int[chan.length];
 		for (int i = 0; i < chan.length; i++)
 			this.chan[i] = chan[i];
 
-		isBigEndian=dev.getFormat().isBigEndian();
 	}
 
-//	public void open() {
-//		System.out.println(" JavaSoundConnection OPEN" + dev);
-//		dev.open();
-//	}
+	public void open() {
+		System.out.println(" JavaSoundConnection OPEN" + dev);
+		dev.open();
+	}
 
 	public int processAudio(AudioBuffer buffer) {
-
 		byte bytes[] = dev.getBuffer();
 
-		assert(bytes != null);
-		
+		if (bytes == null) {
+			int n = buffer.getSampleCount();
+			for (int ch = 0; ch < chan.length; ch++) {
+
+				float out[] = buffer.getChannel(ch);
+
+				for (int i = 0; i < n; i++)
+					out[i] = 0.0f;
+			}
+			return AUDIO_OK;
+		}
 
 		// System.out.println(" proc buff");
 
 		int n = buffer.getSampleCount();
 		int nchan = dev.getChannels();
-		for (int chPtr = 0; chPtr < chan.length; chPtr++) {
-			int ch = chan[chPtr];
+		if (isBigendian) {
+			for (int ch = 0; ch < chan.length; ch++) {
+				int chanO = chan[ch];
+				float out[] = buffer.getChannel(ch);
 
-			float out[] = buffer.getChannel(chPtr);
-
-			if (isBigEndian) {
 				for (int i = 0; i < n; i++) {
-					int ib = i * 2 * nchan + ch * 2;
-
-					short sample = (short) (out[i] * 32768f);
-
-					bytes[ib + 1] = (byte) (0xff & sample);
-					bytes[ib] = (byte) (0xff & (sample >> 8));
-
+					int ib = i * 2 * nchan + chanO * 2;
+					short sample = (short) ((0xff & bytes[ib + 1]) + ((0xff & bytes[ib]) * 256));
+					float val = sample / 32768f;
+					out[i] = val;
 				}
-			} else {
+			}
+		} else {
+			for (int ch = 0; ch < chan.length; ch++) {
+				int chanO = chan[ch];
+				float out[] = buffer.getChannel(ch);
+
 				for (int i = 0; i < n; i++) {
-					int ib = i * 2 * nchan + ch * 2;
-					short sample = (short) (out[i] * 32768f);
-					bytes[ib + 1] = (byte) (0xff & sample>>8);
-					bytes[ib] = (byte) (0xff & (sample ));
-
+					int ib = i * 2 * nchan + chanO * 2;
+					short sample = (short) ((0xff & bytes[ib]) + ((0xff & bytes[ib+1]) * 256));
+					float val = sample / 32768f;
+					out[i] = val;
 				}
-				
-				
 			}
 		}
 		return AUDIO_OK;
@@ -97,25 +101,17 @@ class StereoOutConnection implements AudioLine {
 	}
 
 	public void close() {
-		// TODO Auto-generated method stub
-
+		// null op for
 	}
 
-	// JavaSoundDevice getDeviceHandle() {
-	// return dev;
-	// }
-
-	// public String toString() {
-	// return dev.toString() + ":" + String.valueOf(chan);
-	// }
-
+	//
 	public float getLatencyMilliseconds() {
 		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	public String getName() {
-		return "out " + (chan[0] + 1) + "/" + (chan[1] + 1);
+		return "in " + (chan[0] + 1) + "/" + (chan[1] + 1);
 	}
 
 	public int getLatencyFrames() {
@@ -125,12 +121,7 @@ class StereoOutConnection implements AudioLine {
 
 	public ChannelFormat getChannelFormat() {
 		// TODO Auto-generated method stub
-		return ChannelFormat.MONO;
-	}
-
-	public void open() {
-		// TODO Auto-generated method stub
-		
+		return ChannelFormat.STEREO;
 	}
 
 }

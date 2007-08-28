@@ -35,11 +35,12 @@ class MonoInConnection implements AudioLine {
 	private int chan;
 
 	ChannelFormat chanFormat;
-
+	boolean isBigendian;
+	
 	public MonoInConnection(JavaSoundInDevice dev, int channel) {
 		this.dev = dev;
 		this.chan = channel;
-
+		isBigendian = dev.getFormat().isBigEndian();
 	}
 
 	public void open() {
@@ -64,13 +65,23 @@ class MonoInConnection implements AudioLine {
 
 		int n = buffer.getSampleCount();
 		int nchan = dev.getChannels();
-		for (int i = 0; i < n; i++) {
-			int ib = i * 2 * nchan + chan * 2;
-			short sample = (short) ((0xff & bytes[ib + 1]) + ((0xff & bytes[ib]) * 256));
-			float val = sample / 32768f;
-			out[i] = val;
+		if (isBigendian) {
+			for (int i = 0; i < n; i++) {
+				int ib = i * 2 * nchan + chan * 2;
+				short sample = (short) ((0xff & bytes[ib + 1]) + ((0xff & bytes[ib]) * 256));
+				float val = sample / 32768f;
+				out[i] = val;
+			}
+		} else {
+			
+			for (int i = 0; i < n; i++) {
+				int ib = i * 2 * nchan + chan * 2;
+				short sample = (short) ((0xff & bytes[ib ]) + ((0xff & bytes[ib + 1]) * 256));
+				float val = sample / 32768f;
+				out[i] = val;
+			}
+			
 		}
-
 		return AUDIO_OK;
 
 	}
