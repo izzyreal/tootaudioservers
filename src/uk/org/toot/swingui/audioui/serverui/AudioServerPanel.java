@@ -123,7 +123,8 @@ public class AudioServerPanel extends JPanel implements ActionListener
         bufferUnderRuns.setText(String.valueOf(underRuns));
 		loadTimePercent.setText(String.valueOf(Math.round(100 * server.getLoad())));
         peakLoadTimePercent.setText(String.valueOf(Math.round(100 * server.getPeakLoad())));
-
+        hardwareFrames.setValue(server.getHardwareLatencyFrames());
+        
       	if ( underRuns != underRunCount ) {
 			String time = shortTime.format(new Date());
         	System.err.println(time+" UnderRun "+underRuns+
