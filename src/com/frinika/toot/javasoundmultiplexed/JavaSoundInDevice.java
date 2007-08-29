@@ -62,7 +62,7 @@ class JavaSoundInDevice extends JavaSoundDevice {
 
 				int nread = ((TargetDataLine)line).read(byteBuffer, 0, byteBuffer.length);
 
-				framesRead += bufferSizeInFrames;
+				framesRead += nread/2/af.getChannels(); //  bufferSizeInFrames;
 
 				if (nread == 0)
 					System.out.println("active :" + line.isActive()
