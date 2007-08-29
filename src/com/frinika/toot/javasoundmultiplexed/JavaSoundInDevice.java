@@ -131,4 +131,9 @@ class JavaSoundInDevice extends JavaSoundDevice {
 			return false;
 		return line.isActive();
 	}
+	
+
+    public int getLatencyFrames() {
+        return latencyFrames;
+    }
 }

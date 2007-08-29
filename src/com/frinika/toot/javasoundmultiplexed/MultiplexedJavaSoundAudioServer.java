@@ -16,21 +16,22 @@ import uk.org.toot.audio.server.AudioLine;
 
 import uk.org.toot.audio.server.IOAudioProcess;
 
+
 /**
- * MultiplexedJavaSoundAudioServer 
+ * MultiplexedJavaSoundAudioServer
  * 
  * Provides a Server based on a single javasound DataLine for inout and output.
  * 
  * The widest (most channels) line is used.
  * 
- * The server provides IOAudioProcess that can be mono or stereo based on 1 or 2 channels of the target data line.
- *
+ * The server provides IOAudioProcess that can be mono or stereo based on 1 or 2
+ * channels of the target data line.
+ * 
  */
-public class MultiplexedJavaSoundAudioServer extends PriorityAudioServer
-{
+public class MultiplexedJavaSoundAudioServer extends PriorityAudioServer {
 	// private byte[] sharedByteBuffer;
 
-	//private AudioFormat format;
+	// private AudioFormat format;
 
 	private JavaSoundInDevice inDevice;
 
@@ -40,14 +41,12 @@ public class MultiplexedJavaSoundAudioServer extends PriorityAudioServer
 
 	private List<AudioLine> inputs;
 
-	
-
 	int bufferSizeInFrames;
 
 	private DeviceManager deviceManager;
 
 	public MultiplexedJavaSoundAudioServer() {
-//		this.format = new AudioFormat(44100.0f, 16, 2, true, false); // !!!
+		// this.format = new AudioFormat(44100.0f, 16, 2, true, false); // !!!
 		// sharedByteBuffer = createByteBuffer();
 		outputs = new java.util.ArrayList<AudioLine>();
 		inputs = new java.util.ArrayList<AudioLine>();
@@ -64,7 +63,7 @@ public class MultiplexedJavaSoundAudioServer extends PriorityAudioServer
 	}
 
 	public float getSampleRate() {
-		return 44100.0f; //format.getSampleRate();
+		return 44100.0f; // format.getSampleRate();
 	}
 
 	public int getSampleSizeInBits() {
@@ -121,21 +120,25 @@ public class MultiplexedJavaSoundAudioServer extends PriorityAudioServer
 		for (int i = 0; i < inDevice.getChannels(); i++) {
 			inputs.add(new MonoInConnection(inDevice, i));
 		}
-		
+
 		for (int i = 0; i < inDevice.getChannels() / 2; i++) {
 			int chan[] = { i * 2, i * 2 + 1 };
 			inputs.add(new StereoInConnection(inDevice, chan));
 		}
 	}
 
-	public int getInputLatencyFrames() {
-		return -1; // TODO
-	}
-	
 	public int getOutputLatencyFrames() {
-		return -1; // TODO
+		if (syncLine == null)
+			return 0;
+		return syncLine.getLatencyFrames();
 	}
-	
+
+	public int getInputLatencyFrames() {
+		if (inDevice == null)
+			return 0;
+		return inDevice.getLatencyFrames();
+	}
+
 	public List<String> getAvailableOutputNames() {
 		List<String> names = new java.util.ArrayList<String>();
 
@@ -241,6 +244,12 @@ public class MultiplexedJavaSoundAudioServer extends PriorityAudioServer
 
 	}
 
+	
+//	protected void minimiseInputLatency() {
+//		flushInputs();
+//	}
+	  
+	  
 	protected void controlGained() {
 		flushInputs();
 	}
@@ -251,7 +260,8 @@ public class MultiplexedJavaSoundAudioServer extends PriorityAudioServer
 
 	public void work() {
 
-		if (inDevice != null) inDevice.fillBuffer();
+		if (inDevice != null)
+			inDevice.fillBuffer();
 		if (outDevice != null)
 			outDevice.zeroBuffer();
 		super.work();
