@@ -160,13 +160,25 @@ abstract public class AbstractAudioServer
         return isRunning;
     }
 
+    /**
+     * Return the hardware latency in frames which is assumed to be the same
+     * for both input and output.
+     */
     public int getHardwareLatencyFrames() {
     	return hardwareLatencyFrames;
     }
     
+    /**
+     * Set the hardware latency in frames which is assumed to be the same
+     * for both input and output.
+     */
     public void setHardwareLatencyFrames(int frames) {
     	hardwareLatencyFrames = frames;
     }
+    
+    /**
+     * Return the total latency from analogue input to analogue output.
+     */
     public int getTotalLatencyFrames() {
     	return totalLatencyFrames + 2 * hardwareLatencyFrames;
     }
@@ -251,6 +263,9 @@ abstract public class AbstractAudioServer
 //        System.out.println("Thread stopped");
     }
 
+    /**
+     * Called synchronously with the server to simplify concurrency issues.
+     */
     protected void sync() {
         if ( bufferMilliseconds != requestedBufferMilliseconds ) {
             bufferMilliseconds = requestedBufferMilliseconds;
@@ -268,6 +283,9 @@ abstract public class AbstractAudioServer
         }
     }
 
+    /**
+     * Called when the control loop gains control.
+     */
     protected void controlGained() {
         resetMetrics(false);
     }
@@ -286,16 +304,28 @@ abstract public class AbstractAudioServer
         peakLoad = 0;
     }
 
+    /**
+     * Set the software output latency request in milliseconds.
+     * This is the demand to the control loop.
+     */
     public void setLatencyMilliseconds(float ms) {
         latencyMilliseconds = ms;
         // reset other metrics synchronously
         resetMetrics(false);
     }
 
+    /**
+     * Return the requested software output latency in milliseconds.
+     */
     public float getLatencyMilliseconds() {
         return latencyMilliseconds;
     }
 
+    /**
+     * Return the actual instantaneous software output latency in milliseconds.
+     * This is the controlled amount which will diverge from the requested
+     * amount due to instantaneous control error caused by timing jitter.
+     */
     public float getActualLatencyMilliseconds() {
         return actualLatencyMilliseconds;
     }
@@ -311,41 +341,73 @@ abstract public class AbstractAudioServer
         return lowestLatencyMilliseconds;
     }
 
+    /**
+     * Return the minimum software output latency which may be requested.
+     */
     public float getMinimumLatencyMilliseconds() {
         return bufferUnderRunThreshold + 5f;
     }
 
+    /**
+     * Return the maximum software output latency which may be requested.
+     */
     public float getMaximumLatencyMilliseconds() {
     	return maximumLatencyMilliseconds;
     }
 
+    /**
+     * Return the maximum control error due to timing jitter, in milliseconds.
+     */
     public float getMaximumJitterMilliseconds() {
         return maximumJitterMilliseconds;
     }
 
+    /**
+     * Return the number of buffer underruns which may have resulted in an audio
+     * glitch.
+     */
     public int getBufferUnderRuns() {
         return bufferUnderRuns;
     }
 
+    /**
+     * Return the current normalised CPU load caused by the server (0..1)
+     */
     public float getLoad() {
         return load;
     }
 
+    /**
+     * Return the peak normalised CPU load caused by the server (0..1)
+     */
     public float getPeakLoad() {
         return peakLoad;
     }
 
+    /**
+     * Return the duration of the buffers in milliseconds.
+     */
     public float getBufferMilliseconds() {
         return bufferMilliseconds;
     }
 
+    /**
+     * Set the duration of the buffers in milliseconds.
+     */
     public void setBufferMilliseconds(float ms) {
         requestedBufferMilliseconds = ms;
     }
 
+    /**
+     * Set the timing strategy used by the control loop.
+     * @param strategy
+     */
     public void setTimingStrategy(AudioTimingStrategy strategy) {
         requestedTimingStrategy = strategy;
     }
 
+    /**
+     * Called when buffers are resized.
+     */
     protected abstract void resizeBuffers();
 }
