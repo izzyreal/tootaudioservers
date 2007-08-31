@@ -29,7 +29,7 @@ public class Priority {
     	try
     	{
     		// try loading native library from system lib (library path)
-    		System.loadLibrary("jjack");
+    		System.loadLibrary("priority");
        		System.out.println("native priority library loaded using system library path");
     	} catch(Throwable e)
     	{
