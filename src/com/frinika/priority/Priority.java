@@ -19,37 +19,68 @@ public class Priority {
 
 	public static native void display();
 
-	static {
-		// load native library
-		// String strLibPath = System.getProperty("java.library.path");
+	
+	 // ------------------------------------------------------------------------
+    // --- static initializer                                               ---
+    // ------------------------------------------------------------------------
 
-		/*c
-		 * Load frinika from system resource and write it to the system - If
-		 * we're loading from a JAR file this is the only way to load a library.
-		 * 
-		 * Modified by Peter Salomonsen 2005-05-05 PINCHED BY PJL
-		 */
-		String libFrinikaFileName = "";
-		try {
-			File file = new File("libpriority.so");
-			libFrinikaFileName = file.getAbsolutePath();
-			FileOutputStream fos = new FileOutputStream("libpriority.so");
-
-			System.out.println("Loading Priority library for architecture: "
-					+ System.getProperty("os.arch"));
-			InputStream is = ClassLoader.getSystemResource(
-					"lib/" + System.getProperty("os.arch")
-							+ "/linux/libpriority.so").openStream();
-			while (is.available() > 0)
-				fos.write(is.read());
-			is.close();
-			fos.close();
-		} catch (Exception e) {
-		}
-
-		System.load(libFrinikaFileName);
-
-	}
+    static {
+    	String libJJackFileName=null;
+    	try
+    	{
+    		// try loading native library from system lib (library path)
+    		System.loadLibrary("jjack");
+       		System.out.println("native priority library loaded using system library path");
+    	} catch(Throwable e)
+    	{
+    		try {
+    	
+    		
+    		File file = new File("lib/"+System.getProperty("os.arch")+"/"+System.getProperty("os.name")+"/libpriority.so");
+            libJJackFileName = file.getAbsolutePath();
+            System.load(libJJackFileName);
+       		System.out.println("loaded priority native library "+ libJJackFileName );
+    		
+    		} catch (Throwable e2) {
+           		System.out.println("Problem loading priority library.");
+           		System.out.println("Tried system library path and " + libJJackFileName);
+           		e.printStackTrace();
+           		e2.printStackTrace();
+    			
+    		}
+    	}
+    }
+//	static {
+//		// load native library
+//		// String strLibPath = System.getProperty("java.library.path");
+//
+//		/*c
+//		 * Load frinika from system resource and write it to the system - If
+//		 * we're loading from a JAR file this is the only way to load a library.
+//		 * 
+//		 * Modified by Peter Salomonsen 2005-05-05 PINCHED BY PJL
+//		 */
+//		String libFrinikaFileName = "";
+//		try {
+//			File file = new File("libpriority.so");
+//			libFrinikaFileName = file.getAbsolutePath();
+//			FileOutputStream fos = new FileOutputStream("libpriority.so");
+//			String ldPath ="lib/"+System.getProperty("os.arch")+"/"+System.getProperty("os.name")+"/libpriority.so";
+//			System.out.println("Loading Priority library for architecture: "
+//					+ System.getProperty("os.arch"));
+//			InputStream is = ClassLoader.getSystemResource(ldPath).openStream();
+//			
+//			while (is.available() > 0)
+//				fos.write(is.read());
+//			is.close();
+//			fos.close();
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//
+//		System.load(libFrinikaFileName);
+//
+//	}
 
 	static public double sleepTest() throws Exception {
 		double maxM = 0.0;
