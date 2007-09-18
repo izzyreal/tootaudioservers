@@ -1,8 +1,8 @@
 package com.frinika.priority;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
+//import java.io.FileOutputStream;
+//import java.io.InputStream;
 
 /**
  * A class to set java threads to real time priority.
