@@ -157,6 +157,7 @@ public class JavaSoundAudioServer extends PriorityAudioServer //BasicAudioServer
             	}
             }
         }
+        System.out.println("Oops, no output named "+name);
         return null; // !!!
     }
 
