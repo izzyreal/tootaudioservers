@@ -5,6 +5,8 @@
 
 package uk.org.toot.audio.server;
 
+import uk.org.toot.audio.server.realtime.RTJStrategy;
+
 /**
  * AbstractAudioServer implements AudioServer to control the timing of an
  * AudioClient.
@@ -54,16 +56,18 @@ abstract public class AbstractAudioServer
      * @link aggregation
      * @supplierCardinality 1 
      */
-    private AudioTimingStrategy timingStrategy;
+ //   private AudioTimingStrategy timingStrategy;
 
     /**
      * @supplierCardinality 0..1 */
-    private AudioTimingStrategy requestedTimingStrategy;
+   private boolean requestedTimingStrategy;
 
+    private Strategy strategy;
+    
     private float load = 0; // normalised load, 1 = 100% of available time
     private float peakLoad = 0;
 
-	private Thread thread;
+//	private Thread thread;
 
     /**
      * @link aggregation
@@ -78,7 +82,12 @@ abstract public class AbstractAudioServer
  
     protected int stableThreshold = 1000;
 
-    public AbstractAudioServer() { //throws Exception {
+    public AbstractAudioServer() {
+    	this(new RTJStrategy());
+    }
+    
+    public AbstractAudioServer(Strategy strategy) { //throws Exception {
+    	this.strategy=strategy;
         totalTimeNanos = (long)(bufferMilliseconds * ONE_MILLION);
         try {
 	        Runtime.getRuntime().addShutdownHook(
@@ -97,7 +106,8 @@ abstract public class AbstractAudioServer
             // only correct for DirectSound !!!
             bufferUnderRunThreshold = 30;
         }
-        requestedTimingStrategy = new SleepTimingStrategy();
+        requestedTimingStrategy = true; // strategy.getSleepStrategy();
+        //new SleepTimingStrategy();
     }
 
     public void setClient(AudioClient client) {
@@ -136,9 +146,10 @@ abstract public class AbstractAudioServer
         startASAP = false;
         stableCount = 0;
        	System.out.println("AudioServer starting");
-       	thread = new Thread(this, THREAD_NAME);
-       	thread.start();
-    }
+       	strategy.run(this,THREAD_NAME);
+//      	thread = new Thread(this, THREAD_NAME);
+//       	thread.start();
+   }
 
     public void stop() {
         if ( !isRunning ) return;
@@ -190,13 +201,13 @@ abstract public class AbstractAudioServer
             client.setEnabled(true);
             long startTimeNanos;
 			long endTimeNanos;
-            long expiryTimeNanos = System.nanoTime(); // init required for jitter
+            long expiryTimeNanos = strategy.nanoTime(); // =System.nanoTime(); // init required for jitter
             long compensationNanos = 0;
             float jitterMillis;
             float lowLatencyMillis;
 
             while (isRunning) {
-                startTimeNanos = System.nanoTime();
+                startTimeNanos = strategy.nanoTime();
 
                 // calculate timing jitter
                 jitterMillis = (float)(startTimeNanos - expiryTimeNanos) / ONE_MILLION;
@@ -206,10 +217,11 @@ abstract public class AbstractAudioServer
 
                 sync(); // e.g. resize buffers if requested
                 work();
-                endTimeNanos = System.nanoTime();
-
+                endTimeNanos = strategy.nanoTime();
+                assert(endTimeNanos >= startTimeNanos);
                 // calculate client load
                 load = (float)(endTimeNanos - startTimeNanos) / totalTimeNanos;
+                strategy.notifyLoad(startTimeNanos,endTimeNanos,totalTimeNanos);
                 if ( load > peakLoad ) {
                     peakLoad = load;
                 }
@@ -241,15 +253,17 @@ abstract public class AbstractAudioServer
                 expiryTimeNanos = startTimeNanos + totalTimeNanos + compensationNanos;
 
                 // block
-                long now = System.nanoTime();
+                long now = strategy.nanoTime();
                 long sleepNanos = expiryTimeNanos - now;
+
                 // never block for more than 20ms
                 if ( sleepNanos > 20000000 ) {
                     sleepNanos = 20000000;
                     expiryTimeNanos = now + sleepNanos;
                 }
                 if ( sleepNanos > 500000 ) {
-                    timingStrategy.block(now, sleepNanos);
+                  //  timingStrategy.block(now, sleepNanos);
+                	strategy.block(now,sleepNanos);
                 } else {
                     expiryTimeNanos = now;
                 }
@@ -272,10 +286,11 @@ abstract public class AbstractAudioServer
             totalTimeNanos = (long)(bufferMilliseconds * 1000000);
             resizeBuffers();
         }
-        if ( requestedTimingStrategy != null ) {
-             timingStrategy = requestedTimingStrategy;
-             thread.setPriority(timingStrategy.getThreadPriority());
-             requestedTimingStrategy = null;
+        if ( requestedTimingStrategy ) {
+     //        timingStrategy = requestedTimingStrategy;
+             strategy.setPriority();
+   //          thread.setPriority(timingStrategy.getThreadPriority());
+             requestedTimingStrategy = false;
         }
         if ( requestResetMetrics ) {
             reset();
@@ -402,9 +417,9 @@ abstract public class AbstractAudioServer
      * Set the timing strategy used by the control loop.
      * @param strategy
      */
-    public void setTimingStrategy(AudioTimingStrategy strategy) {
-        requestedTimingStrategy = strategy;
-    }
+//    public void setTimingStrategy(AudioTimingStrategy strategy) {
+//        requestedTimingStrategy = strategy;
+//    }
 
     /**
      * Called when buffers are resized.
