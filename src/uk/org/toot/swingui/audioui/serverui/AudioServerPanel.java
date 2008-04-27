@@ -27,7 +27,7 @@ import com.frinika.toot.PriorityAudioServer;
 /**
  * An AudioServerPanel provides a UI for an AudioServer which allows control
  * of internal buffer time and latency time and monitors actual latency.
- * The panel polls the values at periodic intervals.
+ * The panel polls the values at periodic intervals. 
  */
 public class AudioServerPanel extends JPanel implements ActionListener
 {

@@ -9,7 +9,7 @@ package uk.org.toot.audio.server;
  * AbstractAudioServer implements AudioServer to control the timing of an
  * AudioClient.
  * The buffer size, latency and timing strategy may be varied while running.
- * Note that changing latency may cause inputs to glitch.
+ * Note that changing latency may cause inputs to glitch. 
  * 
  * @author Steve Taylor
  * @author Peter Johan Salomonsen
