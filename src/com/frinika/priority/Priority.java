@@ -25,8 +25,6 @@ public class Priority {
     // ------------------------------------------------------------------------
 
     static {
-        
-        System.out.println("Hello form priority load static ");
     	String libJJackFileName=null;
     	try
     	{
@@ -37,15 +35,8 @@ public class Priority {
     	{
     		try {
     	
-//    			String osarch = System.getProperty("os.arch");
-//					String osname = System.getProperty("os.name");
-//					String libPrefix = "lib/" + osarch + "/" + osname + "/";
-//                                        
-                                        
+    		
     		File file = new File("lib/"+System.getProperty("os.arch")+"/"+System.getProperty("os.name")+"/libpriority.so");
-                
-                System.out.println(file);
-                
             libJJackFileName = file.getAbsolutePath();
             System.load(libJJackFileName);
        		System.out.println("loaded priority native library "+ libJJackFileName );
