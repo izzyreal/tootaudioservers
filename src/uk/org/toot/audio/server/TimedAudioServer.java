@@ -14,7 +14,7 @@ package uk.org.toot.audio.server;
  * @author Steve Taylor
  * @author Peter Johan Salomonsen
  */
-abstract public class AbstractAudioServer 
+abstract public class TimedAudioServer 
     implements Runnable, ExtendedAudioServer
 {
     /**
@@ -78,13 +78,13 @@ abstract public class AbstractAudioServer
  
     protected int stableThreshold = 1000;
 
-    public AbstractAudioServer() { //throws Exception {
+    public TimedAudioServer() { //throws Exception {
         totalTimeNanos = (long)(bufferMilliseconds * ONE_MILLION);
         try {
 	        Runtime.getRuntime().addShutdownHook(
 	            new Thread() {
 	            	public void run() {
-	                	AbstractAudioServer.this.stop();
+	                	TimedAudioServer.this.stop();
 	            	}
 	        	}
 	    	);

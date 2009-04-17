@@ -12,7 +12,7 @@ import uk.org.toot.audio.core.AudioBuffer;
  * BasicAudioServer extends AbstractAudioServer by adding sampled data
  * buffer provision and management.
  */
-abstract public class BasicAudioServer extends AbstractAudioServer
+abstract public class BasicAudioServer extends TimedAudioServer
 {
     private List<AudioBuffer> audioBuffers = new java.util.ArrayList<AudioBuffer>();
 
