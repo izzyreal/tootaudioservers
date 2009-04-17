@@ -28,8 +28,8 @@ public class TootAudioServerUIServiceProvider
         if ( server instanceof JavaSoundAudioServer ||
         	 server instanceof MultiIOJavaSoundAudioServer ) {
             return new AudioServerPanel((ExtendedAudioServer)server, p);
-//        } else if ( server instanceof ASIOAudioServer ) {
-//            return new ASIOAudioServerPanel((ASIOAudioServer)server, p);
+        } else if ( server instanceof ASIOAudioServer ) {
+            return new ASIOAudioServerPanel((ASIOAudioServer)server, p);
         }
         return null; // we can't provide the UI, try another provider
     }

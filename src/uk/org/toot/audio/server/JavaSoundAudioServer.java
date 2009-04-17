@@ -250,7 +250,7 @@ public class JavaSoundAudioServer extends PriorityAudioServer //BasicAudioServer
             name = getAvailableInputNames().get(0);
             System.out.println(label+" null name specified, using "+name);
         }
-        input = new JavaSoundAudioInput(format, inputForName(name), label);
+        input = new JavaSoundAudioInput(format, inputForName(name), label, name);
         input.open();
         inputs.add(input);
 		if ( isRunning ) input.start();
@@ -415,7 +415,7 @@ public class JavaSoundAudioServer extends PriorityAudioServer //BasicAudioServer
         protected long framesRead = 0;
         private boolean doFlush = false;
 
-        public JavaSoundAudioInput(AudioFormat format, Mixer.Info info, String label)
+        public JavaSoundAudioInput(AudioFormat format, Mixer.Info info, String label, String location)
         	throws LineUnavailableException {
             super(format, info, label);
             infoIn = new DataLine.Info(TargetDataLine.class, format);
@@ -423,7 +423,7 @@ public class JavaSoundAudioServer extends PriorityAudioServer //BasicAudioServer
             if ( !AudioSystem.getMixer(mixerInfo).isLineSupported(infoIn) ) {
                 throw new LineUnavailableException(mixerInfo+" does not support "+infoIn);
             }
-            metaInfo = new AudioBuffer.MetaInfo(label);
+            metaInfo = new AudioBuffer.MetaInfo(label, location);
 //            System.out.println(mixerInfo+" supports "+infoIn);
         }
 
