@@ -70,7 +70,7 @@ public class ASIOAudioServerPanel extends AbstractAudioServerPanel
     	outputLatencyLabel.setText(dpString(latencyMillis, 2));
   		latencyMillis = 1000 * server.getInputLatencyFrames() / server.getSampleRate();
     	inputLatencyLabel.setText(dpString(latencyMillis, 2));
-    	loadLabel.setText(dpString(server.getLoad(), 2));
+    	loadLabel.setText(dpString(100 * server.getLoad(), 1));
     	stateLabel.setText(server.isRunning() ? "Active" : "Inactive");
   	}
   	

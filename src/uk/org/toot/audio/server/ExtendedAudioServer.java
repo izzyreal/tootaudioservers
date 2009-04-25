@@ -11,16 +11,8 @@ public interface ExtendedAudioServer extends AudioServer
 {
 	int getSampleSizeInBits();
 		
-    float getPeakLoad();
-
     int getBufferUnderRuns();
-
-    int getHardwareLatencyFrames();
     
-    void setHardwareLatencyFrames(int frames);
-    
-    float getMaximumJitterMilliseconds();
-
     float getLowestLatencyMilliseconds();
 
     float getActualLatencyMilliseconds();

@@ -18,18 +18,24 @@ public class TootAudioServerServiceProvider extends AudioServerServiceProvider
 {
     public TootAudioServerServiceProvider() {
         super(ProviderId.TOOT_PROVIDER_ID, "Toot Software", "Toot Audio Servers", "0.1");
-//        add(JavaSoundAudioServer.class, "JavaSound (stereo)", "default stereo", "0.4");
-        add(MultiIOJavaSoundAudioServer.class, "JavaSound (stereo)", "stereo", "0.1");
-        // if ASIO available add ASIO providers
+        // if ASIO available add ASIO providers first.
         addASIO();
+//        add(JavaSoundAudioServer.class, "JavaSound (stereo)", "default stereo", "0.4");
+        add(MultiIOJavaSoundAudioServer.class, "JavaSound (stereo)", "JavaSound", "0.1");
     }
     
     public AudioServerConfiguration createServerConfiguration(AudioServer server) {
-    	if ( server instanceof JavaSoundAudioServer ||
-    		 server instanceof MultiIOJavaSoundAudioServer ) {
+    	if ( server instanceof ExtendedAudioServer ) {
     		return new ExtendedAudioServerConfiguration((ExtendedAudioServer)server);
     	}
-    	return null;
+    	return null; // ASIOAudioServer has native configuration
+    }
+    
+    public AudioServerConfiguration createServerSetup(AudioServer server) {
+    	if ( server instanceof JavaSoundAudioServer ) {
+    		return new JavaSoundAudioServerSetup((JavaSoundAudioServer)server);
+    	}
+    	return null; // ASIOAudioServer has native setup
     }
     
     protected void addASIO() {
@@ -37,6 +43,8 @@ public class TootAudioServerServiceProvider extends AudioServerServiceProvider
         if ( !osName.contains("Windows") ) return;
     	List<String> driverNames = JAsioHost.getDriverNames();
     	for ( String name : driverNames ) {
+    		if ( name.startsWith("ASIO Multimedia") || 
+    			 name.startsWith("ASIO DirectX") ) continue;
     		add(ASIOAudioServer.class, name, "ASIO", "0.1");
     	}
     }

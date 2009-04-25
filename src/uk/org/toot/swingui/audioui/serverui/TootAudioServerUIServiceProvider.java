@@ -25,13 +25,25 @@ public class TootAudioServerUIServiceProvider
     }
 
     public JComponent createServerUI(AudioServer server, AudioServerConfiguration p) {
-        if ( server instanceof JavaSoundAudioServer ||
-        	 server instanceof MultiIOJavaSoundAudioServer ) {
+        if ( server instanceof ExtendedAudioServer ) {
             return new AudioServerPanel((ExtendedAudioServer)server, p);
         } else if ( server instanceof ASIOAudioServer ) {
             return new ASIOAudioServerPanel((ASIOAudioServer)server, p);
         }
         return null; // we can't provide the UI, try another provider
+    }
+
+    /**
+     * Create the UI that is used prior to use of the server.
+     * Typically it might allow sample rate to be changed.
+     * @param server the AudioServer to provide the UI for.
+     * @return JComponent the UI, null representing no UI.
+     */
+    public JComponent createSetupUI(AudioServer server, AudioServerConfiguration p) {
+    	if ( server instanceof JavaSoundAudioServer ) {
+    		return new JavaSoundAudioServerSetupPanel((JavaSoundAudioServer)server, p);
+    	}
+    	return null;
     }
 
 }

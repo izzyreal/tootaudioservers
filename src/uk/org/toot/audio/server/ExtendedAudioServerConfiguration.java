@@ -5,7 +5,6 @@ import java.util.Properties;
 
 public class ExtendedAudioServerConfiguration extends AudioServerConfiguration
 {
-	private final static String HARDWARE_BUFFER = "hardware.buffer.frames";
 	private final static String USER_BUFFER = ".buffer.milliseconds";
 	private final static String LATENCY = ".latency.milliseconds";
 	private final static String PRIORITY = ".priority";
@@ -22,7 +21,6 @@ public class ExtendedAudioServerConfiguration extends AudioServerConfiguration
 	public Properties getProperties() {
 		Properties p = new Properties();
 		String k = server.getConfigKey();
-		p.setProperty(HARDWARE_BUFFER, String.valueOf(server.getHardwareLatencyFrames()));
 		p.setProperty(k+USER_BUFFER, String.valueOf(server.getBufferMilliseconds()));
 		p.setProperty(k+LATENCY, String.valueOf(server.getLatencyMilliseconds()));
 		if ( hasPriority ) {
@@ -38,10 +36,6 @@ public class ExtendedAudioServerConfiguration extends AudioServerConfiguration
      	   return;
      	}
 		String value;
-		value = p.getProperty(HARDWARE_BUFFER);
-		if ( value != null ) {
-			server.setHardwareLatencyFrames(Integer.valueOf(value));			
-		}
 		String k = server.getConfigKey();
 		value = p.getProperty(k+USER_BUFFER);
 		if ( value != null ) {

@@ -26,7 +26,7 @@ package com.frinika.toot;
 
 import com.frinika.priority.Priority;
 
-import uk.org.toot.audio.server.BasicAudioServer;
+import uk.org.toot.audio.server.TimedAudioServer;
 
 /**
  * 
@@ -34,7 +34,7 @@ import uk.org.toot.audio.server.BasicAudioServer;
  * @author Peter J. Salomonsen
  *
  */
-public abstract class PriorityAudioServer extends BasicAudioServer  {
+public abstract class PriorityAudioServer extends TimedAudioServer  {
 
 	private int priorityRequested = -1;
 	private int priority = 0;

@@ -32,12 +32,11 @@ public class AudioServerPanel extends AbstractAudioServerPanel
     private ExtendedAudioServer server;
     private AudioServerConfiguration config;
 
-//    private JFormattedTextField hardwareFrames;
     private JSpinner bufferMillis;
     private JSpinner latencyMillis;
     private JLabel actualLatencyMillis, lowestLatencyMillis, totalLatencyMillis; 
-    private JLabel maxJitterMillis, bufferUnderRuns;
-    private JLabel loadTimePercent, peakLoadTimePercent;
+    private JLabel bufferUnderRuns;
+    private JLabel loadTimePercent;
 
     private List<JLabel> outputLatencyLabels = new java.util.ArrayList<JLabel>();
     private List<JLabel> inputLatencyLabels = new java.util.ArrayList<JLabel>();
@@ -69,19 +68,14 @@ public class AudioServerPanel extends AbstractAudioServerPanel
   		float totalLatencyFrames = server.getTotalLatencyFrames();
   		float totalLatency = 1000 * totalLatencyFrames / server.getSampleRate();
   		totalLatencyMillis.setText(dpString(totalLatency, 1));
-        maxJitterMillis.setText(dpString(server.getMaximumJitterMilliseconds(), 1));
         int underRuns = server.getBufferUnderRuns();
         bufferUnderRuns.setText(String.valueOf(underRuns));
-		loadTimePercent.setText(String.valueOf(Math.round(100 * server.getLoad())));
-        peakLoadTimePercent.setText(String.valueOf(Math.round(100 * server.getPeakLoad())));
-//        hardwareFrames.setValue(server.getHardwareLatencyFrames());
+		loadTimePercent.setText(dpString(100 * server.getLoad(), 1));
         
       	if ( underRuns != underRunCount ) {
 			String time = shortTime.format(new Date());
         	System.err.println(time+" UnderRun "+underRuns+
-                ", L="+dpString(server.getLowestLatencyMilliseconds(), 1)+
-                "ms, J="+dpString(server.getMaximumJitterMilliseconds(), 1)+
-                "ms, T="+String.valueOf(Math.round(100 * server.getPeakLoad()))+"%");
+                ", L="+dpString(server.getLowestLatencyMilliseconds(), 1)+"ms");
         	underRunCount = underRuns;
             // reset the metrics !!! !!!
             server.resetMetrics(false);
@@ -136,21 +130,6 @@ public class AudioServerPanel extends AbstractAudioServerPanel
             addRow(p, "Priority", priority, "");
         }
 
-/*      found to be unnecessary, getLongFramePosition takes hardware into account  
- 		hardwareFrames = new JFormattedTextField();        	
-        hardwareFrames.setValue(new Integer(server.getHardwareLatencyFrames()));
-        hardwareFrames.setColumns(4);
-        hardwareFrames.setHorizontalAlignment(JTextField.TRAILING);
-        hardwareFrames.addPropertyChangeListener("value",
-        	new PropertyChangeListener() {
-        		public void propertyChange(PropertyChangeEvent e) {
-        			server.setHardwareLatencyFrames(((Number)hardwareFrames.getValue()).intValue());
-        			config.update();
-        		}
-        	}
-        );
-        addRow(p, "Hardware Buffer", hardwareFrames, "frames"); */
-        
         final SpinnerNumberModel bufferModel =
             new SpinnerNumberModel((int)server.getBufferMilliseconds(), 1, 10, 1);
         bufferMillis = new Spinner(bufferModel);
@@ -179,20 +158,16 @@ public class AudioServerPanel extends AbstractAudioServerPanel
         actualLatencyMillis = new JLabel("n/a", JLabel.CENTER);
         lowestLatencyMillis = new JLabel("n/a", JLabel.CENTER);
         totalLatencyMillis = new JLabel("n/a", JLabel.CENTER);
-        maxJitterMillis = new JLabel("n/a", JLabel.CENTER);
 		bufferUnderRuns = new  JLabel("n/a", JLabel.CENTER);
         loadTimePercent = new JLabel("n/a", JLabel.CENTER);
-        peakLoadTimePercent = new JLabel("n/a", JLabel.CENTER);
 
         addRow(p, "Internal Buffer", bufferMillis, "ms");
         addRow(p, "Requested Latency", latencyMillis, "ms");
         addRow(p, "Actual Latency", actualLatencyMillis, "ms");
         addRow(p, "Lowest Latency", lowestLatencyMillis, "ms");
         addRow(p, "Total Latency", totalLatencyMillis, "ms");
-        addRow(p, "Maximum Jitter", maxJitterMillis, "ms");
         addRow(p, "Buffer UnderRuns", bufferUnderRuns, "");
         addRow(p, "Time Load", loadTimePercent, "%");
-        addRow(p, "Peak Time Load", peakLoadTimePercent, "%");
 
         if ( eachIOlatency ) {
 	        for ( int i = 0; i < server.getOutputs().size(); i++ ) {

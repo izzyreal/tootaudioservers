@@ -20,6 +20,7 @@ public class JavaSoundAudioServer extends PriorityAudioServer //BasicAudioServer
     private byte[] sharedByteBuffer;
 
     private int sampleSizeInBits = 16;
+    private float sampleRate = 44100;
 
     private AudioFormat format;
 
@@ -58,13 +59,17 @@ public class JavaSoundAudioServer extends PriorityAudioServer //BasicAudioServer
         this.sampleSizeInBits = sampleSizeInBits;
     }
 
+    public float getSampleRate() {
+    	return sampleRate;
+    }
+    
     public void setSampleRate(float sampleRate) {
         if ( format != null ) {
             throw new IllegalStateException("too late, format already set");
         }
-        super.setSampleRate(sampleRate);
+    	this.sampleRate = sampleRate;
     }
-
+    
     public List<AudioLine> getOutputs() {
         return Collections.<AudioLine>unmodifiableList(outputs);
     }
@@ -73,8 +78,8 @@ public class JavaSoundAudioServer extends PriorityAudioServer //BasicAudioServer
         return Collections.<AudioLine>unmodifiableList(inputs);
     }
 
-    protected void resizeBuffers() {
-        super.resizeBuffers();
+    protected void resizeBuffers(int bufferFrames) {
+        super.resizeBuffers(bufferFrames);
         sharedByteBuffer = createByteBuffer(); // recreate because can't resize an array
     }
 

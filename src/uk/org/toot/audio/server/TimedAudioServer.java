@@ -6,7 +6,7 @@
 package uk.org.toot.audio.server;
 
 /**
- * AbstractAudioServer implements AudioServer to control the timing of an
+ * TimedAudioServer extends AbstractAudioServer to control the timing of an
  * AudioClient.
  * The buffer size, latency and timing strategy may be varied while running.
  * Note that changing latency may cause inputs to glitch. 
@@ -14,15 +14,9 @@ package uk.org.toot.audio.server;
  * @author Steve Taylor
  * @author Peter Johan Salomonsen
  */
-abstract public class TimedAudioServer 
+abstract public class TimedAudioServer extends AbstractAudioServer
     implements Runnable, ExtendedAudioServer
 {
-    /**
-     * a single client, use Composite pattern for multi client
-     * @link aggregation
-     * @supplierCardinality 0..1 
-     */
-    protected AudioClient client;
     protected boolean isRunning = false;
     protected boolean hasStopped = false;
 
@@ -35,13 +29,11 @@ abstract public class TimedAudioServer
 
     private float actualLatencyMilliseconds = 0;
     private float lowestLatencyMilliseconds = bufferMilliseconds;
-    private float maximumJitterMilliseconds = 0;
     private int bufferUnderRuns = 0;
     private int bufferUnderRunThreshold = 0;
 
     private int outputLatencyFrames = 0;
 //    private int inputLatencyFrames = 0;
-    private int hardwareLatencyFrames = 0; // user needs to set 
     private int totalLatencyFrames = -1;
     
     private long totalTimeNanos;
@@ -56,13 +48,6 @@ abstract public class TimedAudioServer
      */
     private AudioTimingStrategy timingStrategy;
 
-    /**
-     * @supplierCardinality 0..1 */
-    private AudioTimingStrategy requestedTimingStrategy;
-
-    private float load = 0; // normalised load, 1 = 100% of available time
-    private float peakLoad = 0;
-
 	private Thread thread;
 
     /**
@@ -71,8 +56,6 @@ abstract public class TimedAudioServer
      */
     protected AudioSyncLine syncLine;
 
-    private boolean startASAP = false;
-
     protected boolean started = false;
     protected int stableCount = 0;
  
@@ -80,69 +63,30 @@ abstract public class TimedAudioServer
 
     public TimedAudioServer() { //throws Exception {
         totalTimeNanos = (long)(bufferMilliseconds * ONE_MILLION);
-        try {
-	        Runtime.getRuntime().addShutdownHook(
-	            new Thread() {
-	            	public void run() {
-	                	TimedAudioServer.this.stop();
-	            	}
-	        	}
-	    	);
-        } catch ( Exception e ) {
-        	System.out.println("AbstractAudioServer Failed to add Shutdown Hook");
-        }
         // estimate buffer underrun threshold for os
         String osName = System.getProperty("os.name");
         if ( osName.contains("Windows") ) {
             // only correct for DirectSound !!!
             bufferUnderRunThreshold = 30;
         }
-        requestedTimingStrategy = new SleepTimingStrategy();
+        timingStrategy = new SleepTimingStrategy();
     }
 
-    public void setClient(AudioClient client) {
-        this.client = client;
-        checkStart(); // start may be delayed waiting for a client to be set
-    }
-
-    abstract protected void work();
-
-    protected void checkStart() {
-        if ( startASAP ) {
-			if ( canStart() ) {
-            	startImpl();
-            } else {
-//                System.out.println("AudioServer start still delayed");
-            }
-        }
-    }
-
+    // @Override
     protected boolean canStart() {
-        return client != null && syncLine != null;
-    }
-
-    public void start() {
-        if ( isRunning ) return;
-        if ( canStart() ) {
-            startImpl();
-        } else {
-	       	System.out.println("AudioServer start requested but delayed");
-            startASAP = true;
-        }
+        return super.canStart() && syncLine != null;
     }
 
     protected void startImpl() {
         started = false;
-        startASAP = false;
         stableCount = 0;
-       	System.out.println("AudioServer starting");
        	thread = new Thread(this, THREAD_NAME);
        	thread.start();
     }
 
-    public void stop() {
-        if ( !isRunning ) return;
-        stopImpl();
+    protected void stopImpl() {
+        isRunning = false;
+        // use Thread.join() here? TODO
         while (!hasStopped) {
             try {
 	            Thread.sleep(10);
@@ -151,68 +95,28 @@ abstract public class TimedAudioServer
         }
     }
 
-    protected void stopImpl() {
-       	System.out.println("AudioServer stopping");
-        isRunning = false;
-    }
-
     public boolean isRunning() {
         return isRunning;
     }
 
     /**
-     * Return the hardware latency in frames which is assumed to be the same
-     * for both input and output.
-     */
-    public int getHardwareLatencyFrames() {
-    	return hardwareLatencyFrames;
-    }
-    
-    /**
-     * Set the hardware latency in frames which is assumed to be the same
-     * for both input and output.
-     */
-    public void setHardwareLatencyFrames(int frames) {
-    	hardwareLatencyFrames = frames;
-    }
-    
-    /**
      * Return the total latency from analogue input to analogue output.
      */
     public int getTotalLatencyFrames() {
-    	return totalLatencyFrames + 2 * hardwareLatencyFrames;
+    	return totalLatencyFrames;
     }
     
     public void run() {
         try {
             hasStopped = false;
             isRunning = true;
-            client.setEnabled(true);
-            long startTimeNanos;
-			long endTimeNanos;
             long expiryTimeNanos = System.nanoTime(); // init required for jitter
             long compensationNanos = 0;
-            float jitterMillis;
             float lowLatencyMillis;
 
-            while (isRunning) {
-                startTimeNanos = System.nanoTime();
-
-                // calculate timing jitter
-                jitterMillis = (float)(startTimeNanos - expiryTimeNanos) / ONE_MILLION;
-                if ( jitterMillis > maximumJitterMilliseconds ) {
-                    maximumJitterMilliseconds = jitterMillis;
-                }
-
+            while ( isRunning ) {
                 sync(); // e.g. resize buffers if requested
                 work();
-                endTimeNanos = System.nanoTime();
-
-                // calculate client load
-                load = (float)(endTimeNanos - startTimeNanos) / totalTimeNanos;
-                if ( load > peakLoad ) {
-                    peakLoad = load;
-                }
 
                 // calculate actual latency
 				outputLatencyFrames = syncLine.getLatencyFrames();
@@ -241,17 +145,16 @@ abstract public class TimedAudioServer
                 expiryTimeNanos = startTimeNanos + totalTimeNanos + compensationNanos;
 
                 // block
-                long now = System.nanoTime();
-                long sleepNanos = expiryTimeNanos - now;
+                long sleepNanos = expiryTimeNanos - endTimeNanos;
                 // never block for more than 20ms
                 if ( sleepNanos > 20000000 ) {
                     sleepNanos = 20000000;
-                    expiryTimeNanos = now + sleepNanos;
+                    expiryTimeNanos = endTimeNanos + sleepNanos;
                 }
                 if ( sleepNanos > 500000 ) {
-                    timingStrategy.block(now, sleepNanos);
+                    timingStrategy.block(endTimeNanos, sleepNanos);
                 } else {
-                    expiryTimeNanos = now;
+                    expiryTimeNanos = endTimeNanos;
                 }
             }
         }
@@ -259,7 +162,6 @@ abstract public class TimedAudioServer
             e.printStackTrace();
         }
         hasStopped = true;
-        client.setEnabled(false);
 //        System.out.println("Thread stopped");
     }
 
@@ -269,13 +171,8 @@ abstract public class TimedAudioServer
     protected void sync() {
         if ( bufferMilliseconds != requestedBufferMilliseconds ) {
             bufferMilliseconds = requestedBufferMilliseconds;
-            totalTimeNanos = (long)(bufferMilliseconds * 1000000);
-            resizeBuffers();
-        }
-        if ( requestedTimingStrategy != null ) {
-             timingStrategy = requestedTimingStrategy;
-             thread.setPriority(timingStrategy.getThreadPriority());
-             requestedTimingStrategy = null;
+            totalTimeNanos = (long)(bufferMilliseconds * ONE_MILLION);
+            resizeBuffers(calculateBufferFrames());
         }
         if ( requestResetMetrics ) {
             reset();
@@ -299,10 +196,8 @@ abstract public class TimedAudioServer
 
     protected void reset() {
         lowestLatencyMilliseconds = actualLatencyMilliseconds;
-        maximumJitterMilliseconds = 0;
         // underruns can't be reset here because underruns cause reset
-        peakLoad = 0;
-    }
+   }
 
     /**
      * Set the software output latency request in milliseconds.
@@ -356,13 +251,6 @@ abstract public class TimedAudioServer
     }
 
     /**
-     * Return the maximum control error due to timing jitter, in milliseconds.
-     */
-    public float getMaximumJitterMilliseconds() {
-        return maximumJitterMilliseconds;
-    }
-
-    /**
      * Return the number of buffer underruns which may have resulted in an audio
      * glitch.
      */
@@ -370,18 +258,8 @@ abstract public class TimedAudioServer
         return bufferUnderRuns;
     }
 
-    /**
-     * Return the current normalised CPU load caused by the server (0..1)
-     */
-    public float getLoad() {
-        return load;
-    }
-
-    /**
-     * Return the peak normalised CPU load caused by the server (0..1)
-     */
-    public float getPeakLoad() {
-        return peakLoad;
+    protected int calculateBufferFrames() {
+        return (int)(getSampleRate() * getBufferMilliseconds() / 1000);
     }
 
     /**
@@ -396,18 +274,6 @@ abstract public class TimedAudioServer
      */
     public void setBufferMilliseconds(float ms) {
         requestedBufferMilliseconds = ms;
+        if ( !isRunning ) sync();
     }
-
-    /**
-     * Set the timing strategy used by the control loop.
-     * @param strategy
-     */
-    public void setTimingStrategy(AudioTimingStrategy strategy) {
-        requestedTimingStrategy = strategy;
-    }
-
-    /**
-     * Called when buffers are resized.
-     */
-    protected abstract void resizeBuffers();
 }
