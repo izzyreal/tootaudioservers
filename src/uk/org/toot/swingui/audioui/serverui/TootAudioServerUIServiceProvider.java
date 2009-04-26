@@ -27,8 +27,6 @@ public class TootAudioServerUIServiceProvider
     public JComponent createServerUI(AudioServer server, AudioServerConfiguration p) {
         if ( server instanceof ExtendedAudioServer ) {
             return new AudioServerPanel((ExtendedAudioServer)server, p);
-        } else if ( server instanceof ASIOAudioServer ) {
-            return new ASIOAudioServerPanel((ASIOAudioServer)server, p);
         }
         return null; // we can't provide the UI, try another provider
     }
