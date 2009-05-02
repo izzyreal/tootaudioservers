@@ -41,6 +41,7 @@ import java.util.logging.Logger;
 public class TimeReferenceMultiIOJavaSoundAudioServer extends MultiIOJavaSoundAudioServer {
     private long jitterReferenceTime;
     private long workCount;
+    private double bufferMillis; // Use local buffer millis as double for better precision
 
     @Override
     public void run() {
@@ -48,16 +49,15 @@ public class TimeReferenceMultiIOJavaSoundAudioServer extends MultiIOJavaSoundAu
             hasStopped = false;
             isRunning = true;
 
-            jitterReferenceTime = System.currentTimeMillis();
-            workCount = 0;
-
+            resetReference();
+            
             while (isRunning) {
-                sync(); // e.g. resize buffers if requested
+                sync(); // e.g. resize buffers if requested                
                 work();
 
-                while((System.currentTimeMillis()-jitterReferenceTime)/getBufferMilliseconds() < workCount)
+                while(isRunning && ((System.currentTimeMillis()-jitterReferenceTime)/bufferMillis) < workCount)
                 {
-                    Thread.sleep(1);
+                    try{ Thread.sleep(1); } catch(InterruptedException e) {}
                 }
                 workCount++;
             }
@@ -66,6 +66,14 @@ public class TimeReferenceMultiIOJavaSoundAudioServer extends MultiIOJavaSoundAu
             e.printStackTrace();
         }
         hasStopped = true;
+    }
+
+    void resetReference()
+    {
+        Logger.getLogger(this.getClass().getName()).info("Resetting jitter reference time and work count");
+        jitterReferenceTime = System.currentTimeMillis();
+        workCount = 0;
+        bufferMillis = ( (double)calculateBufferFrames() / (double)getSampleRate() ) * 1000d;
     }
 
         /**
@@ -77,9 +85,7 @@ public class TimeReferenceMultiIOJavaSoundAudioServer extends MultiIOJavaSoundAu
         super.sync();
         if(currentBufferMilliSeconds != getBufferMilliseconds())
         {
-            Logger.getLogger(this.getClass().getName()).info("Resetting jitter reference time and work count");
-            jitterReferenceTime = System.currentTimeMillis();
-            workCount = 0;            
+            resetReference();
         }
     }
 
