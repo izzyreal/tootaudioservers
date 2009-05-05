@@ -67,7 +67,7 @@ abstract public class TimedAudioServer extends AbstractAudioServer
         String osName = System.getProperty("os.name");
         if ( osName.contains("Windows") ) {
             // only correct for DirectSound !!!
-            bufferUnderRunThreshold = 30;
+            bufferUnderRunThreshold = 33;
         }
         timingStrategy = new SleepTimingStrategy();
     }
@@ -240,7 +240,7 @@ abstract public class TimedAudioServer extends AbstractAudioServer
      * Return the minimum software output latency which may be requested.
      */
     public float getMinimumLatencyMilliseconds() {
-        return bufferUnderRunThreshold + 5f;
+        return bufferUnderRunThreshold + 2f;
     }
 
     /**
