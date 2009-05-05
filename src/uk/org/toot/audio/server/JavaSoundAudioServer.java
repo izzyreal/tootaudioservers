@@ -31,6 +31,7 @@ public class JavaSoundAudioServer extends PriorityAudioServer //BasicAudioServer
     private int lineBufferBytes = 32768;
     
     public JavaSoundAudioServer() {
+    	bufferFrames = calculateBufferFrames();
         outputs = new java.util.ArrayList<JavaSoundAudioOutput>();
         inputs = new java.util.ArrayList<JavaSoundAudioInput>();
     }
