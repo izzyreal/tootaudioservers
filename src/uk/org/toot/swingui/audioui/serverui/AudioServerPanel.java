@@ -12,7 +12,8 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import uk.org.toot.swing.SpringUtilities;
+
+import uk.org.toot.swingui.SpringUtilities;
 import uk.org.toot.audio.server.*;
 //import uk.org.toot.swing.DisposablePanel;
 import java.util.List;
