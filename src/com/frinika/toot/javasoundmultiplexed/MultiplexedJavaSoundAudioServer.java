@@ -41,7 +41,7 @@ public class MultiplexedJavaSoundAudioServer extends PriorityAudioServer {
 
 	private List<AudioLine> inputs;
 
-	int bufferSizeInFrames;
+//	int bufferSizeInFrames;
 
 	private DeviceManager deviceManager;
 
@@ -51,10 +51,10 @@ public class MultiplexedJavaSoundAudioServer extends PriorityAudioServer {
 		outputs = new java.util.ArrayList<AudioLine>();
 		inputs = new java.util.ArrayList<AudioLine>();
 		isRunning = false;
-		bufferSizeInFrames = calculateBufferFrames();
-		System.out.println(" MultiplexBufferSize " + bufferSizeInFrames);
+		bufferFrames = calculateBufferFrames();
+		System.out.println(" MultiplexBufferSize " + bufferFrames);
 		try {
-			deviceManager = new DeviceManager(bufferSizeInFrames);
+			deviceManager = new DeviceManager(bufferFrames);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

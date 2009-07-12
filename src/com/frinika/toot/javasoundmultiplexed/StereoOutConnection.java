@@ -65,6 +65,7 @@ class StereoOutConnection implements AudioLine {
 
 		int n = buffer.getSampleCount();
 		int nchan = dev.getChannels();
+
 		for (int chPtr = 0; chPtr < chan.length; chPtr++) {
 			int ch = chan[chPtr];
 
