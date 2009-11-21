@@ -466,8 +466,8 @@ public class JavaSoundAudioServer extends PriorityAudioServer //BasicAudioServer
         // because if no space we will overrun and lose time and data
         // or on Windows, DirectSound will buffer up to 2 seconds invisibly !!!
         public int processAudio(AudioBuffer buffer) {
-            if ( !buffer.isRealTime() ) return AUDIO_DISCONNECT;
             buffer.setMetaInfo(metaInfo);
+            if ( !buffer.isRealTime() ) return AUDIO_DISCONNECT;
             buffer.setChannelFormat(channelFormat);
             int avail = lineIn.available();
            	if ( avail < sharedByteBuffer.length ) {
