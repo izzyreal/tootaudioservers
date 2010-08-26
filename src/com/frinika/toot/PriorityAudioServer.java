@@ -40,7 +40,7 @@ public abstract class PriorityAudioServer extends TimedAudioServer  {
 	private int priority = 0;
 	private boolean watchDogAlert = false;
 	
-	private static boolean isLinux =
+	private static final boolean isLinux =
 		System.getProperty("os.name").equals("Linux");
 	
 	/**
@@ -56,7 +56,7 @@ public abstract class PriorityAudioServer extends TimedAudioServer  {
 	 */
 	static
 	{
-		if ( isLinux ) {
+		if ( isLinux && Priority.priorityLibraryLoaded) {
 			Thread thr = new Thread()
 			{
 				public void run()
@@ -82,12 +82,13 @@ public abstract class PriorityAudioServer extends TimedAudioServer  {
 	public PriorityAudioServer() {
 	}
 
+    @Override
 	public void work() {
-		if ( isLinux ) {
-			/**
-			 * Set normal priority if the system is blocking
-			 */
-			if(System.currentTimeMillis()-watchDogTimestamp>100 )
+		if ( isLinux && Priority.priorityLibraryLoaded ) {
+                    /**
+                     * Set normal priority if the system is blocking
+                     */
+                    if(System.currentTimeMillis()-watchDogTimestamp>100 )
 		    {
 				if(!watchDogAlert)
 				{

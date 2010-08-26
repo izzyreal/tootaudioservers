@@ -19,7 +19,7 @@ public class Priority {
 
 	public static native void display();
 
-	
+	public static boolean priorityLibraryLoaded = false;
 	 // ------------------------------------------------------------------------
     // --- static initializer                                               ---
     // ------------------------------------------------------------------------
@@ -28,26 +28,24 @@ public class Priority {
     	String libJJackFileName=null;
     	try
     	{
-    		// try loading native library from system lib (library path)
-    		System.loadLibrary("priority");
-       		System.out.println("native priority library loaded using system library path");
+            // try loading native library from system lib (library path)
+            System.loadLibrary("priority");
+            System.out.println("native priority library loaded using system library path");
+            priorityLibraryLoaded = true;
     	} catch(Throwable e)
     	{
-    		try {
-    	
-    		
+            try {
     		File file = new File("lib/"+System.getProperty("os.arch")+"/"+System.getProperty("os.name")+"/libpriority.so");
-            libJJackFileName = file.getAbsolutePath();
-            System.load(libJJackFileName);
+                libJJackFileName = file.getAbsolutePath();
+                System.load(libJJackFileName);
        		System.out.println("loaded priority native library "+ libJJackFileName );
-    		
-    		} catch (Throwable e2) {
-           		System.out.println("Problem loading priority library.");
-           		System.out.println("Tried system library path and " + libJJackFileName);
-           		e.printStackTrace();
-           		e2.printStackTrace();
-    			
-    		}
+    		priorityLibraryLoaded = true;
+            } catch (Throwable e2) {
+                System.out.println("Problem loading priority library.");
+                System.out.println("Tried system library path and " + libJJackFileName);
+                e.printStackTrace();
+                e2.printStackTrace();
+            }
     	}
     }
 //	static {
@@ -96,6 +94,7 @@ public class Priority {
 	}
 
 	public static void main(String[] args) throws Exception {
+            System.out.println("Priority native lib loaded = "+Priority.priorityLibraryLoaded);
 		display();
 		System.out.println("error =" + sleepTest());
 		setPriorityRR(80);
