@@ -69,7 +69,7 @@ abstract public class TimedAudioServer extends AbstractAudioServer
             // only correct for DirectSound !!!
             bufferUnderRunThreshold = 33;
         }
-        timingStrategy = new SleepTimingStrategy();
+        timingStrategy = new SpinningTimingStrategy();
     }
 
     // @Override
@@ -275,5 +275,13 @@ abstract public class TimedAudioServer extends AbstractAudioServer
     public void setBufferMilliseconds(float ms) {
         requestedBufferMilliseconds = ms;
         if ( !isRunning ) sync();
+    }
+
+    public AudioTimingStrategy getTimingStrategy() {
+        return timingStrategy;
+    }
+
+    public void setTimingStrategy(AudioTimingStrategy timingStrategy) {
+        this.timingStrategy = timingStrategy;
     }
 }
