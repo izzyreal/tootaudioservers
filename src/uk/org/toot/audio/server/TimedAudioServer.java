@@ -68,8 +68,11 @@ abstract public class TimedAudioServer extends AbstractAudioServer
         if ( osName.contains("Windows") ) {
             // only correct for DirectSound !!!
             bufferUnderRunThreshold = 33;
+            // Windows hates SpinningTimingStrategy so revert to SleepTimingStrategy - st
+            timingStrategy = new SleepTimingStrategy();
+        } else {
+            timingStrategy = new SpinningTimingStrategy();
         }
-        timingStrategy = new SpinningTimingStrategy();
     }
 
     // @Override
