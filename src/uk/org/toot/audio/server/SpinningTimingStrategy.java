@@ -5,11 +5,16 @@
 
 package uk.org.toot.audio.server;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
- * An AudioTimingStategy which uses Thread.yield() and runs with priority
- * Thread.NORM_PRIORITY+1 to avoid blocking other threads excessively.
- * In practice this strategy is no better than the efficient SleepTimingStrategy
- * and all strategies are at the whim of Garbage Collection.
+ * An AudioTimingStategy which sleeps until the last millisecond before release,
+ * and during the last millisecond the CPU is not released, but spinning in the
+ * blocking loop.
+ * 
+ * @author Steve Taylor
+ * @author Peter Johan Salomonsen
  */
 public class SpinningTimingStrategy implements AudioTimingStrategy
 {
@@ -19,6 +24,14 @@ public class SpinningTimingStrategy implements AudioTimingStrategy
 
     public void block(long nowNanos, long blockNanos) {
         long untilNanos = nowNanos + blockNanos;
-        while ( System.nanoTime() < untilNanos );
+        while ( System.nanoTime() < untilNanos )
+        {
+            if(untilNanos - System.nanoTime()>1000000L)
+                try {
+                Thread.sleep(0,500000);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(SpinningTimingStrategy.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
     }
 }
