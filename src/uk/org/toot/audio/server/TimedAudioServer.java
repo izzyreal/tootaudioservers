@@ -71,7 +71,7 @@ abstract public class TimedAudioServer extends AbstractAudioServer
             // Windows hates SpinningTimingStrategy so revert to SleepTimingStrategy - st
             timingStrategy = new SleepTimingStrategy();
         } else {
-            timingStrategy = new SpinningTimingStrategy();
+            timingStrategy = new SleepTimingStrategy();
         }
     }
 

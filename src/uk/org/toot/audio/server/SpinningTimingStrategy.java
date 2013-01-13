@@ -24,14 +24,18 @@ public class SpinningTimingStrategy implements AudioTimingStrategy
 
     public void block(long nowNanos, long blockNanos) {
         long untilNanos = nowNanos + blockNanos;
-        while ( System.nanoTime() < untilNanos )
-        {
-            if(untilNanos - System.nanoTime()>1000000L)
-                try {
-                Thread.sleep(0,500000);
-            } catch (InterruptedException ex) {
-                Logger.getLogger(SpinningTimingStrategy.class.getName()).log(Level.SEVERE, null, ex);
+        
+        try {
+            // Make sure there's always sleep
+            Thread.sleep(0,10000);
+   
+            while ( System.nanoTime() < untilNanos )
+            {
+                if(untilNanos - System.nanoTime()>1000000L)
+                    Thread.sleep(0,10000);
             }
+        } catch (InterruptedException ex) {
+                Logger.getLogger(SpinningTimingStrategy.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 }
