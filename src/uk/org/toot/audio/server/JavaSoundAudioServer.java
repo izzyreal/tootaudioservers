@@ -265,9 +265,7 @@ public class JavaSoundAudioServer extends PriorityAudioServer //BasicAudioServer
             throw new IllegalArgumentException(output.getName()+" is not a JavaSoundAudioOutput");
         }
         JavaSoundAudioOutput jsoutput = (JavaSoundAudioOutput)output;
-        if ( jsoutput.isActive() ) {
-            jsoutput.stop();
-        }
+        jsoutput.stop();
         jsoutput.close();
         outputs.remove(output);
     }
@@ -293,9 +291,7 @@ public class JavaSoundAudioServer extends PriorityAudioServer //BasicAudioServer
             throw new IllegalArgumentException(input.getName()+" is not a JavaSoundAudioInput");
         }
         JavaSoundAudioInput jsinput = (JavaSoundAudioInput)input;
-        if ( jsinput.isActive() ) {
-            jsinput.stop();
-        }
+        jsinput.stop();
         jsinput.close();
         inputs.remove(input);
     }
