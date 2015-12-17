@@ -8,6 +8,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
+@SuppressWarnings("serial")
 public abstract class AbstractAudioServerPanel extends JPanel
 {
 	protected int gridRows = 0;

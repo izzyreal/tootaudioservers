@@ -8,6 +8,7 @@ package uk.org.toot.swingui.audioui.serverui;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -15,10 +16,12 @@ import java.awt.event.ActionListener;
 
 import uk.org.toot.swingui.SpringUtilities;
 import uk.org.toot.audio.server.*;
+
 //import uk.org.toot.swing.DisposablePanel;
 import java.util.List;
 import java.util.Date;
 import java.text.DateFormat;
+
 //import java.beans.PropertyChangeListener;
 //import java.beans.PropertyChangeEvent;
 import com.frinika.toot.PriorityAudioServer;
@@ -28,6 +31,7 @@ import com.frinika.toot.PriorityAudioServer;
  * of internal buffer time and latency time and monitors actual latency.
  * The panel polls the values at periodic intervals. 
  */
+@SuppressWarnings("serial")
 public class AudioServerPanel extends AbstractAudioServerPanel
 {
     private ExtendedAudioServer server;

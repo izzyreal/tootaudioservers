@@ -8,6 +8,7 @@ import javax.swing.JComboBox;
 import uk.org.toot.audio.server.AudioServerConfiguration;
 import uk.org.toot.audio.server.JavaSoundAudioServer;
 
+@SuppressWarnings("serial")
 public class JavaSoundAudioServerSetupPanel extends AbstractAudioServerPanel
 {
 	private JavaSoundAudioServer server;
