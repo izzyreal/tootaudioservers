@@ -209,6 +209,31 @@ public class JavaSoundAudioServer extends PriorityAudioServer //BasicAudioServer
         }
     }
 
+    // called on shutdown hook to release underying resources
+    @Override
+    public void close() {
+        // close our outputs
+        for ( JavaSoundAudioLine output : outputs ) {
+            try {
+                output.stop();
+                output.close();
+            } catch ( Exception e ) {
+                e.printStackTrace();
+            }
+        }
+        outputs.clear();
+        // close our inputs
+        for ( JavaSoundAudioLine input : inputs ) {
+            try {
+                input.stop();
+                input.close();
+            } catch ( Exception e ) {
+                e.printStackTrace();
+            }
+        }
+        inputs.clear();
+    }
+    
     // has to temporarily stop a running server
     public IOAudioProcess openAudioOutput(String name, String label)
     		throws Exception {

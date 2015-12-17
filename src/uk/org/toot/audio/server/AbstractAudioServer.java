@@ -40,6 +40,7 @@ public abstract class AbstractAudioServer implements AudioServer
 	            new Thread() {
 	            	public void run() {
 	                	AbstractAudioServer.this.stop();
+	                	AbstractAudioServer.this.close();
 	            	}
 	        	}
 	    	);
@@ -135,4 +136,6 @@ public abstract class AbstractAudioServer implements AudioServer
 
 	protected abstract void stopImpl();
 
+	// override if the implementation has resource closing semantics
+	public void close() {}
 }

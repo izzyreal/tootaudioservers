@@ -69,7 +69,8 @@ class DeviceManager {
 
 	static DeviceManager the;
 
-	class MyException extends Exception {
+	@SuppressWarnings("serial")
+    class MyException extends Exception {
 		MyException(String str) {
 			super(str);
 		}
