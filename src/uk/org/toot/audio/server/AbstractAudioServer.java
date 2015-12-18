@@ -137,5 +137,5 @@ public abstract class AbstractAudioServer implements AudioServer
 	protected abstract void stopImpl();
 
 	// override if the implementation has resource closing semantics
-	public void close() {}
+//	public void close() {}
 }

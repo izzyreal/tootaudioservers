@@ -230,6 +230,8 @@ public class MultiplexedJavaSoundAudioServer extends PriorityAudioServer {
 	public void closeAudioInput(IOAudioProcess input) {
 	}
 
+	public void close() {}
+	
 	public void setLatencyMilliseconds(float ms) {
 		if (ms < getLatencyMilliseconds()) {
 			flushInputs();
