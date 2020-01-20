@@ -1,0 +1,85 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id 'signing'
+}
+
+group 'com.github.izzyreal'
+version '1.0'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allJava
+    archiveClassifier.set('sources')
+}
+
+task javadocJar(type: Jar) {
+    from javadoc
+    archiveClassifier.set('javadoc')
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'com.github.izzyreal:toot2:1.0'
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifactId = 'tootaudioservers'
+            from components.java
+            artifact sourcesJar
+            artifact javadocJar
+            pom {
+                name = 'tootaudioservers'
+                description = 'Implementations of AudioServer and AudioServerConfiguration for toot2'
+                url = 'https://github.com/izzyreal/tootaudioservers'
+                licenses {
+                    license {
+                        name = 'GNU General Public License, version 2'
+                        url = 'https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'izzyreal'
+                        name = 'Izmar Verhage'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:git://github.com/izzyreal/tootaudioservers.git'
+                    developerConnection = 'scm:git:ssh://github.com/izzyreal/tootaudioservers.git'
+                    url = 'http://github.com/izzyreal/tootaudioservers/'
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+            def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots"
+            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+            credentials {
+                username = ossrhUsername
+                password = ossrhPassword
+            }
+        }
+    }
+}
+
+javadoc {
+    if (JavaVersion.current().isJava9Compatible()) {
+        options.addBooleanOption('html4', true)
+    }
+}
+
+signing {
+    if (project.hasProperty('signing.keyId') && project.hasProperty('signing.password') && project.hasProperty('signing.secretKeyRingFile')) {
+        sign publishing.publications.mavenJava
+    }
+}
