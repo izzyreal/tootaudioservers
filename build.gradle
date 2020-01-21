@@ -27,6 +27,12 @@ repositories {
 
 dependencies {
     implementation 'com.github.izzyreal:toot2:1.3'
+
+    testImplementation 'junit:junit:4.12'
+}
+
+test {
+    useJUnit()
 }
 
 publishing {
