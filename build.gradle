@@ -21,6 +21,7 @@ task javadocJar(type: Jar) {
 }
 
 repositories {
+    mavenLocal()
     mavenCentral()
 }
 
